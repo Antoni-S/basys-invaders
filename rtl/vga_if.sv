@@ -4,7 +4,7 @@
  * Author: Tomasz Sieja
  *
  * Description:
- * 
+ * Interafce defines VGA timing and data signals.
  */
 
  interface vga_if;

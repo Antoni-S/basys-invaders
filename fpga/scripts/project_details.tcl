@@ -36,6 +36,12 @@ set sv_files {
     ../rtl/draw_bg.sv
     ../rtl/top_vga.sv
     ../rtl/vga_if.sv
+    ../rtl/delay.sv
+    ../rtl/invaders/display_invader.sv
+    ../rtl/invaders/invader_1_rom.sv
+    ../rtl/invaders/invader_2_rom.sv
+    ../rtl/invaders/invader_3_rom.sv
+    ../rtl/invaders/invader_move.sv
     rtl/top_vga_basys3.sv
 }
 
@@ -50,6 +56,8 @@ set verilog_files {
 # }
 
 # Specify files for a memory initialization     -- EDIT
-# set mem_files {
-#    path/to/file.data
-# }
+set mem_files {
+   ../rtl/invaders/invader_1.dat
+   ../rtl/invaders/invader_2.dat
+   ../rtl/invaders/invader_3.dat
+}

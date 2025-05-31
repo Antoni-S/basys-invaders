@@ -6,7 +6,8 @@
  * Modified by:
  * 2025  AGH University of Science and Technology
  * MTM UEC2
- * Piotr Kaczmarczyk
+ * Author: Piotr Kaczmarczyk
+ * Modified: Tomasz Sieja
  *
  * Description:
  * Top level synthesizable module including the project top and all the FPGA-referred modules.

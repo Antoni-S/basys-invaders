@@ -7,6 +7,7 @@
  * 2025  AGH University of Science and Technology
  * MTM UEC2
  * Piotr Kaczmarczyk
+ * Modified: Tomasz Sieja
  *
  * Description:
  * Testbench for top_vga.

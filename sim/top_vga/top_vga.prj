@@ -13,6 +13,12 @@ sv work ../../rtl/vga_pkg.sv \
         ../../rtl/vga_timing.sv \
         ../../rtl/draw_bg.sv \
         ../../rtl/vga_if.sv \
+        ../../rtl/delay.sv \
         ../../rtl/top_vga.sv \
+        ../../rtl/invaders/display_invader.sv \
+        ../../rtl/invaders/invader_1_rom.sv \
+        ../../rtl/invaders/invader_2_rom.sv \
+        ../../rtl/invaders/invader_3_rom.sv \
+        ../../rtl/invaders/invader_move.sv \
         ../common/tiff_writer.sv \
         top_vga_tb.sv

@@ -2,6 +2,7 @@
  *  Copyright (C) 2025  AGH University of Science and Technology
  * MTM UEC2
  * Author: Piotr Kaczmarczyk
+ * Modified: Tomasz Sieja
  *
  * Description:
  * Testbench for vga_timing module.
