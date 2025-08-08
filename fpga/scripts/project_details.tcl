@@ -31,17 +31,22 @@ set xdc_files {
 
 # Specify SystemVerilog design files location   -- EDIT
 set sv_files {
-    ../rtl/vga_pkg.sv
-    ../rtl/vga_timing.sv
-    ../rtl/draw_bg.sv
-    ../rtl/top_vga.sv
-    ../rtl/vga_if.sv
+    ../rtl/display/draw_bg.sv
+    ../rtl/display/draw_rect.sv
+    ../rtl/display/top_vga.sv
+    ../rtl/display/vga_if.sv
+    ../rtl/display/vga_pkg.sv
+    ../rtl/display/vga_timing.sv
+    ../rtl/misc/delay.sv
+    ../rtl/misc/image_rom.sv
+    ../rtl/player/player_ctl.sv
     rtl/top_vga_basys3.sv
 }
 
 # Specify Verilog design files location         -- EDIT
 set verilog_files {
     rtl/clk_wiz_0_clk_wiz.v
+    ../rtl/misc/debouncer.v
 }
 
 # Specify VHDL design files location            -- EDIT
@@ -50,6 +55,7 @@ set verilog_files {
 # }
 
 # Specify files for a memory initialization     -- EDIT
-# set mem_files {
-#    path/to/file.data
-# }
+set mem_files {
+   ../rtl/misc/placeholder.dat
+   ../rtl/misc/tilesheet.dat
+}

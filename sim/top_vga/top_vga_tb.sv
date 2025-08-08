@@ -39,6 +39,7 @@ module top_vga_tb;
     logic clk100MHz, clk65MHz, rst;
     wire vs, hs;
     wire [3:0] r, g, b;
+    wire btnL, btnR;
 
 
     /**
@@ -58,8 +59,10 @@ module top_vga_tb;
 
     top_vga dut (
         .clk100MHz(clk100MHz),
-        .clk65MHz(clk65MHz),
+        .clk(clk65MHz),
         .rst(rst),
+        .btnL,
+        .btnR,
         .vs(vs),
         .hs(hs),
         .r(r),
