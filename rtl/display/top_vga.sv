@@ -39,7 +39,8 @@ module top_vga (
 
     //Wires
     wire [11:0] player_addr, player_rgb, player_xpos, player_ypos;
-    reg db_L, db_R;
+    reg db_L;
+	reg db_R;
 
     /**
     * Signals assignments
@@ -97,7 +98,7 @@ module top_vga (
         .ypos       (player_ypos)
     );
 
-    image_rom #("../../rtl/misc/spritesheet_test.dat")
+    image_rom #("../../rtl/misc/tilesheet.dat")
     u_player_rom (
         .clk,
         .address (player_addr),

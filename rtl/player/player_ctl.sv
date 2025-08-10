@@ -21,6 +21,7 @@ enum logic [1:0] {ST_IDLE, ST_LEFT, ST_RIGHT} state;
  * Local variables and signals
  */
 
+logic [11:0] xpos_nxt, ypos_nxt;
 
 /**
  * Internal logic
@@ -29,8 +30,8 @@ enum logic [1:0] {ST_IDLE, ST_LEFT, ST_RIGHT} state;
 always_ff @(posedge clk) begin
     if (rst) begin
         state <= ST_IDLE;
-        xpos  <= HOR_PIXELS / 2;
-        ypos <= VER_PIXELS - 32;
+        xpos <= HOR_PIXELS / 2;
+        ypos <= VER_PIXELS - 48;
     end else begin
         case(state)
             ST_IDLE: begin
@@ -39,16 +40,22 @@ always_ff @(posedge clk) begin
             end
 
             ST_LEFT: begin
-                if(xpos > 10) xpos <= xpos - 10;
-                else state <= ST_IDLE;
+				if(button_left) begin
+                	if(xpos > 0) xpos_nxt <= xpos - 10;
+				end else state <= ST_IDLE;
             end
             ST_RIGHT: begin
-                if(xpos < HOR_PIXELS - 22) xpos <= xpos + 10;
-                else state <= ST_IDLE;
+				if(button_right) begin
+                	if(xpos < HOR_PIXELS - 64) xpos_nxt <= xpos + 10;
+				end else state <= ST_IDLE;
             end
         endcase
-        ypos <= VER_PIXELS - 32;
     end
+end
+
+always_comb begin
+	xpos = xpos_nxt;
+	ypos = ypos_nxt;
 end
 
 

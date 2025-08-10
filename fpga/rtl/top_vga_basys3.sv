@@ -85,8 +85,8 @@ module top_vga_basys3 (
         .b(vgaBlue),
         .hs(Hsync),
         .vs(Vsync),
-        .btnL,
-        .btnR
+        .btnL(btnL),
+        .btnR(btnR)
     );
 
 endmodule
