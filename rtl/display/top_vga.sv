@@ -16,8 +16,6 @@ module top_vga (
         input  logic clk100MHz,
         input  logic clk, //65MHz clock
         input  logic rst,
-        input  logic btnL,
-        input  logic btnR,
         output logic vs,
         output logic hs,
         output logic [3:0] r,
@@ -30,6 +28,8 @@ module top_vga (
     timeunit 1ns;
     timeprecision 1ps;
 
+	import vga_pkg::*;
+
     /**
     * Local variables and signals
     */
@@ -40,9 +40,10 @@ module top_vga (
     vga_if vga_player_if();
 
     //Wires
-    wire [11:0] player_addr, player_rgb, player_xpos, player_ypos;
+    wire [11:0] player_addr, player_rgb, player_xpos;
+	wire [11:0] player_ypos = VER_PIXELS - 48;
 	wire [15:0] ps2_keycode;
-	wire btnL, btnR;
+	wire buttonL, buttonR;
 
     /**
     * Signals assignments
@@ -65,8 +66,8 @@ module top_vga (
 	keyboard_ctl u_keyboard_ctl (
 		.clk,
 		.keycode(ps2_keycode),
-		.button_left(btnL),
-		.button_right(btnR)
+		.button_left(buttonL),
+		.button_right(buttonR)
 	);
 
     vga_timing u_vga_timing (
@@ -85,10 +86,9 @@ module top_vga (
     player_ctl u_player_ctl (
         .clk,
         .rst,
-        .button_left  (db_L),
-        .button_right (db_R),
-        .xpos         (player_xpos),
-        .ypos         (player_ypos)
+        .button_left  (buttonL),
+        .button_right (buttonR),
+        .xpos         (player_xpos)
     );
 
     draw_rect u_player_rect (

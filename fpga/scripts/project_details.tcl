@@ -37,6 +37,7 @@ set sv_files {
     ../rtl/display/vga_if.sv
     ../rtl/display/vga_pkg.sv
     ../rtl/display/vga_timing.sv
+	../rtl/keyboard/keyboard_ctl.sv
     ../rtl/misc/delay.sv
     ../rtl/misc/image_rom.sv
     ../rtl/player/player_ctl.sv
@@ -48,7 +49,6 @@ set verilog_files {
     ../rtl/keyboard/debouncer.v
     ../rtl/keyboard/PS2Receiver.v
     rtl/clk_wiz_0_clk_wiz.v
-    ../rtl/misc/debouncer.v
 }
 
 # Specify VHDL design files location            -- EDIT
