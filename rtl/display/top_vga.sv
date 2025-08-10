@@ -22,7 +22,9 @@ module top_vga (
         output logic hs,
         output logic [3:0] r,
         output logic [3:0] g,
-        output logic [3:0] b
+        output logic [3:0] b,
+		inout  logic PS2Clk,
+		inout  logic PS2Data
     );
 
     timeunit 1ns;
@@ -39,8 +41,8 @@ module top_vga (
 
     //Wires
     wire [11:0] player_addr, player_rgb, player_xpos, player_ypos;
-    reg db_L;
-	reg db_R;
+	wire [15:0] ps2_keycode;
+	wire btnL, btnR;
 
     /**
     * Signals assignments
@@ -53,17 +55,19 @@ module top_vga (
     /**
     * Submodules instances
     */
-    debouncer u_debounceL (
-        .clk,
-        .I (btnL),
-        .O (db_L)
-    );
+	PS2Receiver u_PS2Receiver (
+		.clk,
+		.kclk(PS2Clk),
+		.kdata(PS2Data),
+		.keycode(ps2_keycode)
+	);
 
-    debouncer u_debounceR (
-        .clk,
-        .I (btnR),
-        .O (db_R)
-    );
+	keyboard_ctl u_keyboard_ctl (
+		.clk,
+		.keycode(ps2_keycode),
+		.button_left(btnL),
+		.button_right(btnR)
+	);
 
     vga_timing u_vga_timing (
         .clk,

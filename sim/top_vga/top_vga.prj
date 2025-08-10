@@ -15,10 +15,12 @@ sv work ../../rtl/display/vga_pkg.sv \
         ../../rtl/display/vga_if.sv \
         ../../rtl/display/top_vga.sv \
         ../../rtl/display/draw_rect.sv \
+		../../rtl/keyboard/keyboard_ctl.sv \
         ../../rtl/misc/delay.sv \
         ../../rtl/misc/image_rom.sv \
         ../../rtl/player/player_ctl.sv \
         ../common/tiff_writer.sv \
         top_vga_tb.sv
 
-verilog work ../../rtl/misc/debouncer.v \
+verilog work ../../rtl/keyboard/debouncer.v \
+			 ../../rtl/keyboard/PS2Receiver.v

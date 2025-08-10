@@ -45,6 +45,8 @@ set sv_files {
 
 # Specify Verilog design files location         -- EDIT
 set verilog_files {
+    ../rtl/keyboard/debouncer.v
+    ../rtl/keyboard/PS2Receiver.v
     rtl/clk_wiz_0_clk_wiz.v
     ../rtl/misc/debouncer.v
 }
