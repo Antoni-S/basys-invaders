@@ -31,24 +31,20 @@ set xdc_files {
 
 # Specify SystemVerilog design files location   -- EDIT
 set sv_files {
-#-------------------- DISPLAY -----------------------#
     ../rtl/display/vga_pkg.sv
+    ../rtl/display/top_vga.sv
     ../rtl/display/vga_timing.sv
     ../rtl/display/draw_bg.sv
-    ../rtl/display/top_vga.sv
     ../rtl/display/vga_if.sv
-#-------------------- KEYBOARD ----------------------#
-    ../rtl/keyboard/top_keyboard.sv
-#-------------------- MISC --------------------------#
+    ../rtl/keyboard/keyboard_ctl.sv
     ../rtl/misc/delay.sv
     rtl/top_vga_basys3.sv
 }
 
 # Specify Verilog design files location         -- EDIT
 set verilog_files {
-#-------------------- KEYBOARD ----------------------#
-    ../rtl/keyboard/debounce.v
-#-------------------- MISC --------------------------#
+    ../rtl/keyboard/debouncer.v
+    ../rtl/keyboard/PS2Receiver.v
     rtl/clk_wiz_0_clk_wiz.v
 }
 

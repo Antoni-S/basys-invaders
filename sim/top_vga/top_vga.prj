@@ -14,5 +14,9 @@ sv work ../../rtl/display/vga_pkg.sv \
         ../../rtl/display/draw_bg.sv \
         ../../rtl/display/vga_if.sv \
         ../../rtl/display/top_vga.sv \
+		../../rtl/keyboard/keyboard_ctl.sv \
         ../common/tiff_writer.sv \
         top_vga_tb.sv
+
+verilog work ../../rtl/keyboard/debouncer.v \
+			 ../../rtl/keyboard/PS2Receiver.v
