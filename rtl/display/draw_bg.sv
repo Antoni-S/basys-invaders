@@ -10,6 +10,8 @@
 module draw_bg (
         input logic clk,
         input logic rst,
+		input logic inL,
+		input logic inR,
 
         vga_if.in vga_in,
         vga_if.out vga_out
@@ -52,29 +54,12 @@ module draw_bg (
         end
     end
 
-    // always_comb begin : bg_comb_blk
-    //     if (vga_in.vblnk || vga_in.hblnk) begin             // Blanking region:
-    //         rgb_nxt = 12'h0_0_0;                            // - make it it black.
-    //     end else begin                                      // Active region:
-    //         if (vga_in.vcount == 0)                         // - top edge:
-    //             rgb_nxt = 12'hf_f_0;                        // - - make a yellow line.
-    //         else if (vga_in.vcount == VER_PIXELS - 1)       // - bottom edge:
-    //             rgb_nxt = 12'hf_0_0;                        // - - make a red line.
-    //         else if (vga_in.hcount == 0)                    // - left edge:
-    //             rgb_nxt = 12'h0_f_0;                        // - - make a green line.
-    //         else if (vga_in.hcount == HOR_PIXELS - 1)       // - right edge:
-    //             rgb_nxt = 12'h0_0_f;                        // - - make a blue line.
-    //         else                                            // The rest of active display pixels:
-    //             rgb_nxt = 12'h8_8_8;                        // - fill with gray.
-    //     end
-    // end
-
 
     always_comb begin : bg_comb_blk
         if (vga_in.vblnk || vga_in.hblnk) begin 
             rgb_nxt = 12'h8_8_8;                           
-        end else begin                                  
-            rgb_nxt = 12'h0_0_0;                        
+        end else begin
+			rgb_nxt = 12'h0_0_0;                        
         end
    end
 

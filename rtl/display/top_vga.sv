@@ -14,13 +14,15 @@
  
 module top_vga (
         input  logic clk100MHz,
-        input  logic clk65MHz,
+        input  logic clk,
         input  logic rst,
         output logic vs,
         output logic hs,
         output logic [3:0] r,
         output logic [3:0] g,
-        output logic [3:0] b
+        output logic [3:0] b,
+		inout  logic PS2Clk,
+		inout  logic PS2Data
     );
 
     timeunit 1ns;
@@ -34,6 +36,9 @@ module top_vga (
     vga_if tim_to_bg();
     vga_if bg_to_output();
 
+	wire [15:0] ps2_keycode;
+	wire btnL, btnR;
+
     /**
     * Signals assignments
     */
@@ -46,15 +51,29 @@ module top_vga (
     * Submodules instances
     */
 
+	PS2Receiver u_PS2Receiver (
+		.clk,
+		.kclk(PS2Clk),
+		.kdata(PS2Data),
+		.keycode(ps2_keycode)
+	);
+
+	keyboard_ctl u_keyboard_ctl (
+		.clk,
+		.keycode(ps2_keycode),
+		.button_left(btnL),
+		.button_right(btnR)
+	);
+
     vga_timing u_vga_timing (
-        .clk(clk65MHz),
-        .rst(rst),
+        .clk,
+        .rst,
         .vga_out(tim_to_bg.out)
     );
 
     draw_bg u_draw_bg (
-        .clk(clk65MHz),
-        .rst(rst),
+        .clk,
+        .rst,
         .vga_in(tim_to_bg.in),
         .vga_out(bg_to_output.out)
     );
