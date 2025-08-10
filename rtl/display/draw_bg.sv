@@ -10,8 +10,6 @@
 module draw_bg (
         input logic clk,
         input logic rst,
-		input logic inL,
-		input logic inR,
 
         vga_if.in vga_in,
         vga_if.out vga_out
@@ -54,12 +52,11 @@ module draw_bg (
         end
     end
 
-
     always_comb begin : bg_comb_blk
-        if (vga_in.vblnk || vga_in.hblnk) begin 
-            rgb_nxt = 12'h8_8_8;                           
+        if (vga_in.vblnk || vga_in.hblnk) begin
+            rgb_nxt = 12'h8_8_8;
         end else begin
-			rgb_nxt = 12'h0_0_0;                        
+            rgb_nxt = 12'h0_0_0;
         end
    end
 

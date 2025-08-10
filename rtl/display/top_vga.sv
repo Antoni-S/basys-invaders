@@ -14,7 +14,7 @@
  
 module top_vga (
         input  logic clk100MHz,
-        input  logic clk,
+        input  logic clk, //65MHz clock
         input  logic rst,
         output logic vs,
         output logic hs,
@@ -28,29 +28,34 @@ module top_vga (
     timeunit 1ns;
     timeprecision 1ps;
 
+	import vga_pkg::*;
+
     /**
     * Local variables and signals
     */
 
-    // Interface
-    vga_if tim_to_bg();
-    vga_if bg_to_output();
+    // VGA interface
+    vga_if vga_timing_if();
+    vga_if vga_bg_if();
+    vga_if vga_player_if();
 
+    //Wires
+    wire [11:0] player_addr, player_rgb, player_xpos;
+	wire [11:0] player_ypos = VER_PIXELS - 48;
 	wire [15:0] ps2_keycode;
-	wire btnL, btnR;
+	wire buttonL, buttonR;
 
     /**
     * Signals assignments
     */
 
-    assign vs = bg_to_output.vsync;
-    assign hs = bg_to_output.hsync;
-    assign {r,g,b} = bg_to_output.rgb;
+    assign vs = vga_player_if.vsync;
+    assign hs = vga_player_if.hsync;
+    assign {r,g,b} = vga_player_if.rgb;
 
     /**
     * Submodules instances
     */
-
 	PS2Receiver u_PS2Receiver (
 		.clk,
 		.kclk(PS2Clk),
@@ -61,21 +66,47 @@ module top_vga (
 	keyboard_ctl u_keyboard_ctl (
 		.clk,
 		.keycode(ps2_keycode),
-		.button_left(btnL),
-		.button_right(btnR)
+		.button_left(buttonL),
+		.button_right(buttonR)
 	);
 
     vga_timing u_vga_timing (
         .clk,
         .rst,
-        .vga_out(tim_to_bg.out)
+        .vga_out (vga_timing_if.out)
     );
 
     draw_bg u_draw_bg (
         .clk,
         .rst,
-        .vga_in(tim_to_bg.in),
-        .vga_out(bg_to_output.out)
+        .vga_in  (vga_timing_if.in),
+        .vga_out (vga_bg_if.out)
+    );
+
+    player_ctl u_player_ctl (
+        .clk,
+        .rst,
+        .button_left  (buttonL),
+        .button_right (buttonR),
+        .xpos         (player_xpos)
+    );
+
+    draw_rect u_player_rect (
+        .clk,
+        .rst,
+        .draw_in    (vga_bg_if.in),
+        .draw_out   (vga_player_if.out),
+        .rgb_pixel  (player_rgb),
+        .pixel_addr (player_addr),
+        .xpos       (player_xpos),
+        .ypos       (player_ypos)
+    );
+
+    image_rom #("../../rtl/misc/tilesheet.dat")
+    u_player_rom (
+        .clk,
+        .address (player_addr),
+        .rgb     (player_rgb)
     );
 
 endmodule

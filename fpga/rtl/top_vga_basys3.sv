@@ -15,6 +15,8 @@
 module top_vga_basys3 (
         input  wire clk,
         input  wire btnC,
+        input  wire btnL,
+        input  wire btnR,
         output wire Vsync,
         output wire Hsync,
         output wire [3:0] vgaRed,
