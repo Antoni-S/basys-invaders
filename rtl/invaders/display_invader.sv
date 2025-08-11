@@ -113,7 +113,8 @@ module display_invader #(
             rgb_nxt = rgb_d;
         end
         else if (invader_active) begin
-            rgb_nxt = rgb_pixel;
+            if(rgb_pixel == 12'h0_0_0) rgb_nxt = rgb_d;
+			else rgb_nxt = rgb_pixel;
         end
         else begin
             rgb_nxt = rgb_d;
