@@ -2,7 +2,6 @@
  * Copyright (C) 2025  AGH University of Science and Technology
  * MTM UEC2
  * Author: Piotr Kaczmarczyk
- * Modified: Tomasz Sieja
  *
  * Description:
  * Draw background.
@@ -54,10 +53,10 @@ module draw_bg (
     end
 
     always_comb begin : bg_comb_blk
-        if (vga_in.vblnk || vga_in.hblnk) begin 
-            rgb_nxt = 12'h8_8_8;                           
-        end else begin                                  
-            rgb_nxt = 12'h0_0_0;                        
+        if (vga_in.vblnk || vga_in.hblnk) begin
+            rgb_nxt = 12'h8_8_8;
+        end else begin
+            rgb_nxt = 12'h0_0_f;
         end
    end
 

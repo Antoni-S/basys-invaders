@@ -40,6 +40,7 @@ module top_vga_tb;
     logic clk100MHz, clk65MHz, rst;
     wire vs, hs;
     wire [3:0] r, g, b;
+	wire PS2Clk, PS2Data;
 
 
     /**
@@ -59,13 +60,15 @@ module top_vga_tb;
 
     top_vga dut (
         .clk100MHz(clk100MHz),
-        .clk65MHz(clk65MHz),
+        .clk(clk65MHz),
         .rst(rst),
         .vs(vs),
         .hs(hs),
         .r(r),
         .g(g),
-        .b(b)
+        .b(b),
+		.PS2Clk,
+		.PS2Data
     );
 
     tiff_writer #(

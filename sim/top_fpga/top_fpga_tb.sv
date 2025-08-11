@@ -37,6 +37,7 @@ module top_fpga_tb;
      */
 
     logic clk, rst;
+    logic btnL, btnR;
     wire pclk;
     wire vs, hs;
     wire [3:0] r, g, b;
@@ -59,6 +60,8 @@ module top_fpga_tb;
     top_vga_basys3 dut (
         .clk(clk),
         .btnC(rst),
+        .btnL,
+        .btnR,
         .Vsync(vs),
         .Hsync(hs),
         .vgaRed(r),
