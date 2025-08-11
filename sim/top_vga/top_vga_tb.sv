@@ -61,8 +61,6 @@ module top_vga_tb;
         .clk100MHz(clk100MHz),
         .clk(clk65MHz),
         .rst(rst),
-        .btnL,
-        .btnR,
         .vs(vs),
         .hs(hs),
         .r(r),
