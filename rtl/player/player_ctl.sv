@@ -21,7 +21,8 @@ import vga_pkg::*;
  */
 localparam MOVEMENT_SPEED = 5;
 localparam MOVEMENT_DELAY = 650000;
-localparam INITIAL_POS = HOR_PIXELS/2 - PLAYER_WIDTH/2;
+localparam INITIAL_POS = HOR_PIXELS/2;
+localparam MAX_POS_R = HOR_PIXELS - PLAYER_WIDTH - (PLAYER_WIDTH / 4) - MOVEMENT_SPEED;
 
 /**
  * Internal signals
@@ -71,7 +72,7 @@ always_comb begin
         end
     end
     else if (button_right && !button_left) begin
-        if (xpos < HOR_PIXELS - PLAYER_WIDTH - MOVEMENT_SPEED) begin
+        if (xpos < MAX_POS_R) begin
             xpos_nxt = xpos + MOVEMENT_SPEED;
         end else begin
             xpos_nxt = HOR_PIXELS - PLAYER_WIDTH;

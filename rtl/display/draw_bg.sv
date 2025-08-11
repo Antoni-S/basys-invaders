@@ -56,7 +56,7 @@ module draw_bg (
         if (vga_in.vblnk || vga_in.hblnk) begin
             rgb_nxt = 12'h8_8_8;
         end else begin
-            rgb_nxt = 12'h0_0_0;
+            rgb_nxt = 12'h0_0_f;
         end
    end
 

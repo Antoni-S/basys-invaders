@@ -33,6 +33,9 @@ module top_vga (
     /**
     * Local variables and signals
     */
+	//Local parameters
+	localparam SPRITE_WIDTH = 64;
+	localparam SPRITE_HEIGHT = 64;
 
     // VGA interface
     vga_if vga_timing_if();
@@ -41,7 +44,7 @@ module top_vga (
 
     //Wires
     wire [11:0] player_addr, player_rgb, player_xpos;
-	wire [11:0] player_ypos = VER_PIXELS - 48;
+	wire [11:0] player_ypos = VER_PIXELS - SPRITE_HEIGHT;
 	wire [15:0] ps2_keycode;
 	wire buttonL, buttonR;
 
@@ -83,7 +86,9 @@ module top_vga (
         .vga_out (vga_bg_if.out)
     );
 
-    player_ctl u_player_ctl (
+    player_ctl #(
+		.PLAYER_WIDTH(SPRITE_WIDTH)
+	) u_player_ctl (
         .clk,
         .rst,
         .button_left  (buttonL),
@@ -91,7 +96,10 @@ module top_vga (
         .xpos         (player_xpos)
     );
 
-    draw_rect u_player_rect (
+    draw_rect #(
+		.RECT_WIDTH(SPRITE_WIDTH),
+		.RECT_HEIGHT(SPRITE_HEIGHT)
+	) u_player_rect (
         .clk,
         .rst,
         .draw_in    (vga_bg_if.in),
@@ -102,7 +110,7 @@ module top_vga (
         .ypos       (player_ypos)
     );
 
-    image_rom #("../../rtl/misc/tilesheet.dat")
+    image_rom #("../../rtl/misc/spaceship1.dat")
     u_player_rom (
         .clk,
         .address (player_addr),
