@@ -59,5 +59,6 @@ set verilog_files {
 # Specify files for a memory initialization     -- EDIT
 set mem_files {
    ../rtl/misc/placeholder.dat
-   ../rtl/misc/tilesheet.dat
+   ../rtl/player/spaceship1.dat
+   ../rtl/player/projectile.dat
 }

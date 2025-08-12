@@ -36,17 +36,25 @@ module top_vga (
 	//Local parameters
 	localparam SPRITE_WIDTH = 64;
 	localparam SPRITE_HEIGHT = 64;
+	localparam PROJECTILE_WIDTH = 16;
+	localparam PROJECTILE_HEIGHT = 32;
+
+	localparam PLAYER_SPEED = 4;
+	localparam PROJECTILE_SPEED = 6;
 
     // VGA interface
     vga_if vga_timing_if();
     vga_if vga_bg_if();
     vga_if vga_player_if();
+    vga_if vga_projectile_if();
 
     //Wires
     wire [11:0] player_addr, player_rgb, player_xpos;
 	wire [11:0] player_ypos = VER_PIXELS - SPRITE_HEIGHT;
+    wire [11:0] projectile_addr, projectile_rgb, projectile_xpos, projectile_ypos;
+	wire bullet_active;
 	wire [15:0] ps2_keycode;
-	wire buttonL, buttonR;
+	wire buttonL, buttonR, buttonU;
 
     /**
     * Signals assignments
@@ -70,7 +78,8 @@ module top_vga (
 		.clk,
 		.keycode(ps2_keycode),
 		.button_left(buttonL),
-		.button_right(buttonR)
+		.button_right(buttonR),
+		.button_shoot(buttonU)
 	);
 
     vga_timing u_vga_timing (
@@ -87,13 +96,22 @@ module top_vga (
     );
 
     player_ctl #(
-		.PLAYER_WIDTH(SPRITE_WIDTH)
+		.PLAYER_WIDTH(SPRITE_WIDTH),
+		.PLAYER_HEIGHT(SPRITE_HEIGHT),
+		.BULLET_WIDTH(PROJECTILE_WIDTH),
+		.BULLET_HEIGHT(PROJECTILE_HEIGHT),
+		.MOVEMENT_SPEED(PLAYER_SPEED),
+		.BULLET_SPEED(PROJECTILE_SPEED)
 	) u_player_ctl (
         .clk,
         .rst,
         .button_left  (buttonL),
         .button_right (buttonR),
-        .xpos         (player_xpos)
+        .button_shoot (buttonU),
+        .xpos         (player_xpos),
+		.xpos_shoot   (projectile_xpos),
+		.bullet_y     (projectile_ypos),
+		.bullet_active(bullet_active)
     );
 
     draw_rect #(
@@ -102,7 +120,7 @@ module top_vga (
 	) u_player_rect (
         .clk,
         .rst,
-        .draw_in    (vga_bg_if.in),
+        .draw_in    (vga_projectile_if.in),
         .draw_out   (vga_player_if.out),
         .rgb_pixel  (player_rgb),
         .pixel_addr (player_addr),
@@ -110,11 +128,32 @@ module top_vga (
         .ypos       (player_ypos)
     );
 
-    image_rom #("../../rtl/misc/spaceship1.dat")
+	draw_rect #(
+		.RECT_WIDTH(PROJECTILE_WIDTH),
+		.RECT_HEIGHT(PROJECTILE_HEIGHT)
+	)u_projectile_rect (
+		.clk,
+		.rst,
+		.draw_in    (vga_bg_if.in),
+		.draw_out   (vga_projectile_if.out),
+		.rgb_pixel  (projectile_rgb),
+		.pixel_addr (projectile_addr),
+		.xpos       (bullet_active ? projectile_xpos : HOR_PIXELS),
+		.ypos       (bullet_active ? projectile_ypos : 0)
+	);
+
+    image_rom #("../../rtl/player/spaceship1.dat")
     u_player_rom (
         .clk,
         .address (player_addr),
         .rgb     (player_rgb)
+    );
+
+	image_rom #("../../rtl/player/projectile.dat")
+    u_projectile_rom (
+        .clk,
+        .address (projectile_addr),
+        .rgb     (projectile_rgb)
     );
 
 endmodule
