@@ -36,7 +36,7 @@ module top_vga (
 	//Local parameters
 	localparam SPRITE_WIDTH = 64;
 	localparam SPRITE_HEIGHT = 64;
-	localparam NUM_INVADERS = 10;
+	localparam NUM_INVADERS = 11;
     localparam OFFSET = 100;
 
     // VGA interface

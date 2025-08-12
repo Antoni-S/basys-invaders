@@ -42,14 +42,15 @@ module display_invader #(
     /**
      * Local variables and signals
      */
-    logic [11:0] rgb_nxt, rgb_d;
-    logic [10:0] hcount_d, vcount_d;
-    logic hsync_d, vsync_d, hblnk_d, vblnk_d;
+	vga_if vga_d();
+
+	logic [11:0] rgb_nxt;
 
     logic [5:0] rel_x, rel_y;
 
     logic invader_active;
 
+	logic [NUM_INVADERS-1:0] invader_x_positions[NUM_INVADERS];
     /**
      * Delays
      */
@@ -60,7 +61,7 @@ module display_invader #(
         .clk (clk65MHz),
         .rst (rst),
         .din ({vga_in.hcount, vga_in.hsync, vga_in.vcount, vga_in.vsync, vga_in.hblnk, vga_in.vblnk, vga_in.rgb}),
-        .dout ({hcount_d, hsync_d, vcount_d, vsync_d, hblnk_d, vblnk_d, rgb_d})
+        .dout ({vga_d.hcount, vga_d.hsync, vga_d.vcount, vga_d.vsync, vga_d.hblnk, vga_d.vblnk, vga_d.rgb})
     );
 
     /**
@@ -76,48 +77,55 @@ module display_invader #(
             vga_out.hblnk  <= '0;
             vga_out.rgb    <= '0;
         end else begin
-            vga_out.hcount <= hcount_d;
-            vga_out.vcount <= vcount_d;
-            vga_out.hsync  <= hsync_d;
-            vga_out.vsync  <= vsync_d;
-            vga_out.hblnk  <= hblnk_d;
-            vga_out.vblnk  <= vblnk_d;
+            vga_out.hcount <= vga_d.hcount;
+            vga_out.vcount <= vga_d.vcount;
+            vga_out.hsync  <= vga_d.hsync;
+            vga_out.vsync  <= vga_d.vsync;
+            vga_out.hblnk  <= vga_d.hblnk;
+            vga_out.vblnk  <= vga_d.vblnk;
             vga_out.rgb    <= rgb_nxt;
+        end
+    end
+
+	always_comb begin : invader_positions
+        for (int i = 0; i < NUM_INVADERS; i++) begin
+            invader_x_positions[i] = X_INIT + xpos + i * (INVADER_WIDTH + SPACING);
         end
     end
 
     // Calculate which invader is being displayed
     always_comb begin : invaders_display
-        invader_active = 0;
+        invader_active = '0;
         pixel_addr = '0;
         
         for (int currentInvader = 0; currentInvader < NUM_INVADERS; currentInvader++) begin
             if (invader_enable[currentInvader]) begin
-            automatic int currentX = X_INIT + xpos + currentInvader * (INVADER_WIDTH + SPACING);
+            automatic int currentX = invader_x_positions[currentInvader];
             automatic int currentY = Y_INIT + ypos;
 
-                if ((hcount_d >= currentX) && (hcount_d < currentX + INVADER_WIDTH) &&
-                    (vcount_d >= currentY) && (vcount_d < currentY + INVADER_HEIGHT)) begin
+                if ((vga_d.hcount >= currentX) && (vga_d.hcount < currentX + INVADER_WIDTH) &&
+                    (vga_d.vcount >= currentY) && (vga_d.vcount < currentY + INVADER_HEIGHT)) begin
                     invader_active = 1;
 
-                    rel_x = hcount_d - currentX;
-                    rel_y = vcount_d - currentY;
+                    rel_x = vga_d.hcount - currentX;
+                    rel_y = vga_d.vcount - currentY;
                     pixel_addr = {rel_y[5:0], rel_x[5:0]};
+					break;
                 end
             end
         end
     end
 
     always_comb begin : output_comb_blk
-        if (vblnk_d || hblnk_d) begin
-            rgb_nxt = rgb_d;
+        if (vga_d.vblnk || vga_d.hblnk) begin
+            rgb_nxt = vga_d.rgb;
         end
         else if (invader_active) begin
-            if(rgb_pixel == 12'h0_0_0) rgb_nxt = rgb_d;
+            if(rgb_pixel == 12'h0_0_0) rgb_nxt = vga_d.rgb;
 			else rgb_nxt = rgb_pixel;
         end
         else begin
-            rgb_nxt = rgb_d;
+            rgb_nxt = vga_d.rgb;
         end
     end
     

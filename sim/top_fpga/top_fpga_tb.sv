@@ -60,8 +60,6 @@ module top_fpga_tb;
     top_vga_basys3 dut (
         .clk(clk),
         .btnC(rst),
-        .btnL,
-        .btnR,
         .Vsync(vs),
         .Hsync(hs),
         .vgaRed(r),
