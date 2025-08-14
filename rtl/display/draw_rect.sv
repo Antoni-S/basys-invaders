@@ -1,7 +1,6 @@
 
 
 module draw_rect #(
-    parameter SHEET_X_SPRITES_COUNT = 1,
 	parameter RECT_WIDTH = 32,
 	parameter RECT_HEIGHT = 32
 )
@@ -27,7 +26,6 @@ import vga_pkg::*;
  * Local variables and signals
  */
 
-localparam SHEET_WIDTH = SHEET_X_SPRITES_COUNT * RECT_HEIGHT;
 localparam ANIMATION_FRAME = 0;
 
 /**
@@ -68,7 +66,7 @@ always_ff @(posedge clk) begin
     end
 end
 
-assign pixel_addr = (draw_in.vcount-ypos) * RECT_HEIGHT + (draw_in.hcount - xpos);// + (RECT_WIDTH * ANIMATION_FRAME);
+assign pixel_addr = (draw_in.vcount-ypos) * RECT_WIDTH + (draw_in.hcount - xpos);// + (RECT_WIDTH * ANIMATION_FRAME);
 // To get the proper image scale from the tilesheet you need to pass the amount of sprites in the sheet times sprite height
 // For animation, to get the frame you want, pass the frame no. (indexing from 0) times sprite width
 
