@@ -41,7 +41,12 @@ module top_vga (
 
 	localparam PLAYER_SPEED = 4;
 	localparam PROJECTILE_SPEED = 6;
+
+    localparam ENEMY_INIT_X = 0;
+    localparam INVADER_HEIGHT = 32;
+    localparam INVADER_WIDTH = 64;
 	localparam NUM_INVADERS = 10;
+    localparam NUM_ROWS = 3;
     localparam OFFSET = 100;
 
     // VGA interface
@@ -66,8 +71,11 @@ module top_vga (
     wire[11:0] image_addr_row2, image_rgb_row2;
     wire[11:0] image_addr_row3, image_rgb_row3;
 
-    wire[9:0]  xpos, ypos;
-    wire[NUM_INVADERS-1:0]  collision1, collision2, collision3;
+    wire[9:0]  enemy_xpos, enemy_ypos;
+    wire [NUM_INVADERS-1:0][11:0] invader_x_positions;
+
+    wire [NUM_ROWS - 1:0][NUM_INVADERS - 1:0] collision;
+    wire bullet_hit;
 
     /**
     * Signals assignments
@@ -76,10 +84,6 @@ module top_vga (
     assign vs = invader_row3_to_output.vsync;
     assign hs = invader_row3_to_output.hsync;
     assign {r,g,b} = invader_row3_to_output.rgb;
-
-	assign collision1 = 10'b11_1011_1111;
-	assign collision2 = 10'b01_1111_1111;
-	assign collision3 = 10'b11_1111_1011;
 
     /**
     * Submodules instances
@@ -128,7 +132,8 @@ module top_vga (
         .xpos         (player_xpos),
 		.xpos_shoot   (projectile_xpos),
 		.bullet_y     (projectile_ypos),
-		.bullet_active(bullet_active)
+		.bullet_active(bullet_active),
+        .bullet_hit(bullet_hit)
     );
 
     draw_rect #(
@@ -173,14 +178,34 @@ module top_vga (
         .rgb     (projectile_rgb)
     );
 
+    collisions #(
+        .NUM_INVADERS(NUM_INVADERS),
+        .NUM_ROWS(NUM_ROWS),
+        .OFFSET(OFFSET),
+        .INVADER_HEIGHT(INVADER_HEIGHT),
+        .INVADER_WIDTH(INVADER_WIDTH),
+        .PROJECTILE_WIDTH(PROJECTILE_WIDTH),
+        .PROJECTILE_HEIGHT(PROJECTILE_HEIGHT)
+    ) u_collisions (
+        .clk,
+        .rst,
+        .enemy_ypos(enemy_ypos),
+        .invader_x_positions(invader_x_positions),
+        .projectile_xpos(projectile_xpos),
+        .projectile_ypos(projectile_ypos),
+        .bullet_active(bullet_active),
+        .collision(collision),
+        .bullet_hit(bullet_hit)
+    );
+
     /*
      * Row 1
      */
     display_invader #(
-        .X_INIT(0),
-        .Y_INIT(100),
-        .INVADER_HEIGHT(32),
-        .INVADER_WIDTH(64),
+        .X_INIT(ENEMY_INIT_X),
+        .Y_INIT(OFFSET),
+        .INVADER_HEIGHT(INVADER_HEIGHT),
+        .INVADER_WIDTH(INVADER_WIDTH),
         .NUM_INVADERS(NUM_INVADERS),
         .OFFSET(OFFSET)
     ) display_invader_row1 (
@@ -190,10 +215,11 @@ module top_vga (
         .vga_in(vga_player_if.in),
         .vga_out(invader_row1_to_invader_row2.out),
 
-        .xpos(xpos),
-        .ypos(ypos),
-        
-        .invader_enable(collision1),
+        .xpos(enemy_xpos),
+        .ypos(enemy_ypos),
+        .invader_x_positions(invader_x_positions),
+
+        .invader_enable(collision[0]),
         .pixel_addr(image_addr_row1),
         .rgb_pixel(image_rgb_row1)
     );
@@ -210,10 +236,10 @@ module top_vga (
      * Row 2
      */
     display_invader #(
-        .X_INIT(0),
-        .Y_INIT(200),
-        .INVADER_HEIGHT(32),
-        .INVADER_WIDTH(64),
+        .X_INIT(ENEMY_INIT_X),
+        .Y_INIT(OFFSET * 2),
+        .INVADER_HEIGHT(INVADER_HEIGHT),
+        .INVADER_WIDTH(INVADER_WIDTH),
         .NUM_INVADERS(NUM_INVADERS),
         .OFFSET(OFFSET)
     ) display_invader_row2 (
@@ -223,10 +249,10 @@ module top_vga (
         .vga_in(invader_row1_to_invader_row2.in),
         .vga_out(invader_row2_to_invader_row3.out),
 
-        .xpos(xpos),
-        .ypos(ypos),
+        .xpos(enemy_xpos),
+        .ypos(enemy_ypos),
         
-        .invader_enable(collision2),
+        .invader_enable(collision[1]),
         .pixel_addr(image_addr_row2),
         .rgb_pixel(image_rgb_row2)
     );
@@ -244,10 +270,10 @@ module top_vga (
      * Row 3
      */
     display_invader #(
-        .X_INIT(0),
-        .Y_INIT(300),
-        .INVADER_HEIGHT(32),
-        .INVADER_WIDTH(64),
+        .X_INIT(ENEMY_INIT_X),
+        .Y_INIT(OFFSET * 3),
+        .INVADER_HEIGHT(INVADER_HEIGHT),
+        .INVADER_WIDTH(INVADER_WIDTH),
         .NUM_INVADERS(NUM_INVADERS),
         .OFFSET(OFFSET)
     ) display_invader_row3 (
@@ -257,10 +283,10 @@ module top_vga (
         .vga_in(invader_row2_to_invader_row3.in),
         .vga_out(invader_row3_to_output.out),
 
-        .xpos(xpos),
-        .ypos(ypos),
+        .xpos(enemy_xpos),
+        .ypos(enemy_ypos),
 
-        .invader_enable(collision3),
+        .invader_enable(collision[2]),
         .pixel_addr(image_addr_row3),
         .rgb_pixel(image_rgb_row3)
     );
@@ -280,8 +306,8 @@ module top_vga (
         .clk65MHz(clk),
         .rst(rst),
 
-        .xpos(xpos),
-        .ypos(ypos)
+        .xpos(enemy_xpos),
+        .ypos(enemy_ypos)
     );
 
 endmodule

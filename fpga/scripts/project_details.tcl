@@ -43,6 +43,7 @@ set sv_files {
     ../rtl/player/player_ctl.sv
 	../rtl/invaders/display_invader.sv
 	../rtl/invaders/invader_move.sv
+    ../rtl/invaders/collisions.sv
     rtl/top_vga_basys3.sv
 }
 

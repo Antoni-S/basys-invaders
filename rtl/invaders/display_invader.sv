@@ -26,7 +26,8 @@ module display_invader #(
     input logic  [9:0]  xpos,
     input logic  [9:0]  ypos,
 
-    output logic [11:0] pixel_addr
+    output logic [11:0] pixel_addr,
+    output logic [NUM_INVADERS-1:0][11:0] invader_x_positions
 );
 
     timeunit 1ns;
@@ -49,8 +50,6 @@ module display_invader #(
     logic [5:0] rel_x, rel_y;
 
     logic invader_active;
-
-	logic [NUM_INVADERS-1:0] invader_x_positions[NUM_INVADERS];
     /**
      * Delays
      */
