@@ -41,6 +41,8 @@ set sv_files {
     ../rtl/misc/delay.sv
     ../rtl/misc/image_rom.sv
     ../rtl/player/player_ctl.sv
+	../rtl/invaders/display_invader.sv
+	../rtl/invaders/invader_move.sv
     rtl/top_vga_basys3.sv
 }
 

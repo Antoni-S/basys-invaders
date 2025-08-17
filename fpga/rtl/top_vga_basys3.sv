@@ -6,7 +6,8 @@
  * Modified by:
  * 2025  AGH University of Science and Technology
  * MTM UEC2
- * Piotr Kaczmarczyk
+ * Author: Piotr Kaczmarczyk
+ * Modified: Tomasz Sieja
  *
  * Description:
  * Top level synthesizable module including the project top and all the FPGA-referred modules.
@@ -15,8 +16,6 @@
 module top_vga_basys3 (
         input  wire clk,
         input  wire btnC,
-        input  wire btnL,
-        input  wire btnR,
         output wire Vsync,
         output wire Hsync,
         output wire [3:0] vgaRed,

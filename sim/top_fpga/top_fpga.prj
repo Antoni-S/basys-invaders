@@ -19,6 +19,11 @@ sv work ../../rtl/display/vga_pkg.sv \
         ../../rtl/misc/image_rom.sv \
         ../../rtl/player/player_ctl.sv \
         ../../fpga/rtl/top_vga_basys3.sv \
+        ../../rtl/invaders/display_invader.sv \
+        ../../rtl/invaders/invader_1_rom.sv \
+        ../../rtl/invaders/invader_2_rom.sv \
+        ../../rtl/invaders/invader_3_rom.sv \
+        ../../rtl/invaders/invader_move.sv \
         ../common/tiff_writer.sv \
         top_fpga_tb.sv
 

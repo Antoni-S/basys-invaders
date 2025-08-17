@@ -19,6 +19,8 @@ sv work ../../rtl/display/vga_pkg.sv \
         ../../rtl/misc/delay.sv \
         ../../rtl/misc/image_rom.sv \
         ../../rtl/player/player_ctl.sv \
+		../../rtl/invaders/display_invader.sv \
+        ../../rtl/invaders/invader_move.sv \
         ../common/tiff_writer.sv \
         top_vga_tb.sv
 
