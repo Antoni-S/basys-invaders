@@ -41,7 +41,7 @@ module top_vga (
 
 	localparam PLAYER_SPEED = 4;
 	localparam PROJECTILE_SPEED = 6;
-	localparam NUM_INVADERS = 11;
+	localparam NUM_INVADERS = 10;
     localparam OFFSET = 100;
 
     // VGA interface

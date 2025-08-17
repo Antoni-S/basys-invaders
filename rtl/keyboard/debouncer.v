@@ -1,5 +1,6 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
+// Module source: https://digilent.com/reference/programmable-logic/basys-3/demos/keyboard
 // Company: 
 // Engineer: 
 // 
