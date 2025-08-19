@@ -53,7 +53,7 @@ always_comb begin
             for(logic [NUM_INVADERS - 1:0] j = 0; j < NUM_INVADERS; j++) begin
                 automatic logic [11:0] current_enemy_y = enemy_ypos + i * OFFSET;
 
-                automatic logic x_overlap = (projectile_xpos < invader_x_positions[j] + INVADER_WIDTH) && (projectile_xpos + PROJECTILE_WIDTH > invader_x_positions[j]);
+                automatic logic x_overlap = (projectile_xpos <= invader_x_positions[j] + INVADER_WIDTH) && (projectile_xpos + PROJECTILE_WIDTH >= invader_x_positions[j]);
                 automatic logic y_overlap = (projectile_ypos <= current_enemy_y + INVADER_HEIGHT) && (projectile_ypos + PROJECTILE_HEIGHT >= current_enemy_y);
 
                 if (x_overlap && y_overlap && collision[i][j]) begin

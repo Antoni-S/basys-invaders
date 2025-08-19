@@ -59,15 +59,7 @@ logic can_shoot, can_shoot_nxt;
  * Internal logic
  */
 
-delay #(
-    .WIDTH(1),
-    .CLK_DEL(4)
-) u_delay (
-    .clk,
-    .rst,
-    .din(bullet_hit),
-    .dout(bullet_hit_d)
-);
+
 
 always_ff @(posedge clk) begin : clock_divide
     if (rst) begin
@@ -80,6 +72,16 @@ always_ff @(posedge clk) begin : clock_divide
         end else begin
             delay_counter <= delay_counter + 1;
             movement_enable <= 0;
+        end
+    end
+end
+
+always_ff @(posedge clk) begin : hold_hit
+    if(bullet_hit) begin
+        bullet_hit_d <= bullet_hit;
+    end else begin
+        if(movement_enable) begin
+            bullet_hit_d <= bullet_hit;
         end
     end
 end
