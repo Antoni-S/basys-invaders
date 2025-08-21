@@ -44,8 +44,8 @@ import vga_pkg::*;
 logic [NUM_ROWS - 1:0][NUM_INVADERS - 1:0] collision_nxt;
 logic bullet_hit_nxt;
 logic player_hit_nxt;
-logic found_any_live = 0;
-logic lowest_live_row = 0;
+logic found_any_live;
+logic [$clog2(NUM_ROWS)-1:0] lowest_live_row;
 
 /**
  * Internal logic
@@ -93,8 +93,6 @@ always_comb begin
             found_any_live = 1;
             break;
         end
-
-        if(row == 0 && |collision[row] == 0) found_any_live = 0;
     end
     
 

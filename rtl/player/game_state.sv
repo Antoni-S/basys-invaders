@@ -52,7 +52,7 @@ always_comb begin
     game_won_nxt = game_won;
     if(player_hit) begin
         game_lost_nxt = 1;
-    end else if(collision == 0) begin
+    end else if(collision == '0) begin
         game_won_nxt = 1;
     end
 end

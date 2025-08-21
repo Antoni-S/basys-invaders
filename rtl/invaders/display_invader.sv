@@ -55,7 +55,7 @@ module display_invader #(
      */
     delay #(
         .WIDTH (38),
-        .CLK_DEL(2)
+        .CLK_DEL(1)
     ) u_delay (
         .clk (clk65MHz),
         .rst (rst),
@@ -86,11 +86,17 @@ module display_invader #(
         end
     end
 
-	always_comb begin : invader_positions
+	always_ff @(posedge clk65MHz) begin : invader_positions_ff
+    if (rst) begin
         for (int i = 0; i < NUM_INVADERS; i++) begin
-            invader_x_positions[i] = X_INIT + xpos + i * (INVADER_WIDTH + SPACING);
+            invader_x_positions[i] <= X_INIT + i * (INVADER_WIDTH + SPACING);
+        end
+    end else begin
+        for (int i = 0; i < NUM_INVADERS; i++) begin
+            invader_x_positions[i] <= X_INIT + xpos + i * (INVADER_WIDTH + SPACING);
         end
     end
+end
 
     // Calculate which invader is being displayed
     always_comb begin : invaders_display

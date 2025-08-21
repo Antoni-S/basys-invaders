@@ -51,6 +51,7 @@ module top_vga (
 
     // VGA interface
     vga_if vga_bg_if();
+    vga_if vga_sync_if();
     vga_if vga_player_if();
 	vga_if bg_to_invader_row1();
     vga_if invader_row1_to_invader_row2();
@@ -87,15 +88,16 @@ module top_vga (
     wire player_hit;
 
     wire game_lost, game_won;
+    wire game_won_delayed;
     wire [11:0] win_addr, win_rgb;
     wire [11:0] lose_addr, lose_rgb;
     /**
     * Signals assignments
     */
 	
-    assign vs = invader_row3_to_output.vsync;
-    assign hs = invader_row3_to_output.hsync;
-    assign {r,g,b} = invader_row3_to_output.rgb;
+    assign vs = game_lost ? vga_lose_if.vsync : game_won ? vga_win_if.vsync : invader_row3_to_output.vsync;
+    assign hs = game_lost ? vga_lose_if.hsync : game_won ? vga_win_if.hsync : invader_row3_to_output.hsync;
+    assign {r,g,b} = game_lost ? vga_lose_if.rgb : game_won ? vga_win_if.rgb : invader_row3_to_output.rgb;
 
     /**
     * Submodules instances
@@ -142,6 +144,18 @@ module top_vga (
         .vga_out (vga_bg_if.out)
     );
 
+    delay #(
+    .WIDTH(38),
+    .CLK_DEL(1)
+    ) u_vga_sync (
+        .clk(clk),
+        .rst(rst),
+        .din({vga_bg_if.hcount, vga_bg_if.hsync, vga_bg_if.hblnk, 
+            vga_bg_if.vcount, vga_bg_if.vsync, vga_bg_if.vblnk, vga_bg_if.rgb}),
+        .dout({vga_sync_if.hcount, vga_sync_if.hsync, vga_sync_if.hblnk,
+            vga_sync_if.vcount, vga_sync_if.vsync, vga_sync_if.vblnk, vga_sync_if.rgb})
+    );
+
     //------------------- PLAYER ------------------------
 
     player_ctl #(
@@ -170,7 +184,7 @@ module top_vga (
 	) u_player_rect (
         .clk,
         .rst,
-        .draw_in    (vga_lose_if.in),
+        .draw_in    (vga_projectile_if.in),
         .draw_out   (vga_player_if.out),
         .rgb_pixel  (player_rgb),
         .pixel_addr (player_addr),
@@ -185,7 +199,7 @@ module top_vga (
 	)u_projectile_rect (
 		.clk,
 		.rst,
-		.draw_in    (vga_bg_if.in),
+		.draw_in    (vga_sync_if.in),
 		.draw_out   (vga_projectile_if.out),
 		.rgb_pixel  (projectile_rgb),
 		.pixel_addr (projectile_addr),
@@ -243,49 +257,16 @@ module top_vga (
         .game_won(game_won)
     );
 
-    draw_rect #(
-        .RECT_HEIGHT(64),
-        .RECT_WIDTH(256)
-    ) u_game_won_rect (
-        .clk,
-        .rst,
-        .draw_in(vga_projectile_if.in),
-        .draw_out(vga_win_if.out),
-        .enabled(game_won),
-        .pixel_addr(win_addr),
-        .rgb_pixel(win_rgb),
-        .xpos(12'(HOR_PIXELS / 3)),
-        .ypos(12'(VER_PIXELS / 4))
+    delay #(
+    .WIDTH(1),
+    .CLK_DEL(3)  // Opóźnienie odpowiadające opóźnieniom VGA
+    ) u_game_won_delay (
+        .clk(clk),
+        .rst(rst),
+        .din(game_won),
+        .dout(game_won_delayed)
     );
 
-    draw_rect #(
-        .RECT_HEIGHT(128),
-        .RECT_WIDTH(256)
-    ) u_game_lose_rect (
-        .clk,
-        .rst,
-        .draw_in(vga_win_if.in),
-        .draw_out(vga_lose_if.out),
-        .enabled(game_lost),
-        .pixel_addr(lose_addr),
-        .rgb_pixel(lose_rgb),
-        .xpos(12'(HOR_PIXELS / 3)),
-        .ypos(12'(VER_PIXELS / 4))
-    );
-
-    image_rom #("../../rtl/misc/win.dat")
-    u_win_rom (
-        .clk,
-        .address (win_addr),
-        .rgb     (win_rgb)
-    );
-
-    image_rom #("../../rtl/misc/lose.dat")
-    u_lose_rom (
-        .clk,
-        .address (lose_addr),
-        .rgb     (lose_rgb)
-    );
 
     //------------------- INVADERS ------------------------
     /*
@@ -398,6 +379,52 @@ module top_vga (
 
         .xpos(enemy_xpos),
         .ypos(enemy_ypos)
+    );
+
+    //------------------- GAME END SCREENS ------------------------
+
+    draw_rect #(
+        .RECT_HEIGHT(64),
+        .RECT_WIDTH(256)
+    ) u_game_won_rect (
+        .clk,
+        .rst,
+        .draw_in(vga_bg_if.in),
+        .draw_out(vga_win_if.out),
+        .enabled(game_won_delayed),
+        .pixel_addr(win_addr),
+        .rgb_pixel(win_rgb),
+        .xpos(12'(HOR_PIXELS / 2 - 128)),
+        .ypos(12'(VER_PIXELS / 4))
+    );
+
+    draw_rect #(
+        .RECT_HEIGHT(128),
+        .RECT_WIDTH(256)
+    ) u_game_lose_rect (
+        .clk,
+        .rst,
+        .draw_in(vga_bg_if.in),
+        .draw_out(vga_lose_if.out),
+        .enabled(game_lost),
+        .pixel_addr(lose_addr),
+        .rgb_pixel(lose_rgb),
+        .xpos(12'(HOR_PIXELS / 2 - 128)),
+        .ypos(12'(VER_PIXELS / 4))
+    );
+
+    image_rom #("../../rtl/misc/win.dat")
+    u_win_rom (
+        .clk,
+        .address (win_addr),
+        .rgb     (win_rgb)
+    );
+
+    image_rom #("../../rtl/misc/lose.dat")
+    u_lose_rom (
+        .clk,
+        .address (lose_addr),
+        .rgb     (lose_rgb)
     );
 
 endmodule
