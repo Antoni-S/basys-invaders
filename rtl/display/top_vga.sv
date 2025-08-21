@@ -50,7 +50,6 @@ module top_vga (
     localparam OFFSET = 100;
 
     // VGA interface
-    vga_if vga_timing_if();
     vga_if vga_bg_if();
     vga_if vga_player_if();
 	vga_if bg_to_invader_row1();
@@ -60,6 +59,13 @@ module top_vga (
     vga_if vga_projectile_if();
 
     //Wires
+    logic [10:0] hcount;
+    logic [10:0] vcount;
+    logic hblnk;
+    logic vblnk;
+    logic hsync;
+    logic vsync;
+
     wire [11:0] player_addr, player_rgb, player_xpos;
 	wire [11:0] player_ypos = VER_PIXELS - SPRITE_HEIGHT;
     wire [11:0] projectile_addr, projectile_rgb, projectile_xpos, projectile_ypos;
@@ -76,6 +82,7 @@ module top_vga (
 
     wire [NUM_ROWS - 1:0][NUM_INVADERS - 1:0] collision;
     wire bullet_hit;
+    wire player_hit;
 
     /**
     * Signals assignments
@@ -106,13 +113,23 @@ module top_vga (
     vga_timing u_vga_timing (
         .clk,
         .rst,
-        .vga_out (vga_timing_if.out)
+        .hcount,
+        .vcount,
+        .hblnk,
+        .vblnk,
+        .hsync,
+        .vsync
     );
 
     draw_bg u_draw_bg (
         .clk,
         .rst,
-        .vga_in  (vga_timing_if.in),
+        .hcount,
+        .vcount,
+        .hblnk,
+        .vblnk,
+        .hsync,
+        .vsync,
         .vga_out (vga_bg_if.out)
     );
 
@@ -195,7 +212,8 @@ module top_vga (
         .projectile_ypos(projectile_ypos),
         .bullet_active(bullet_active),
         .collision(collision),
-        .bullet_hit(bullet_hit)
+        .bullet_hit(bullet_hit),
+        .player_hit(player_hit)
     );
 
     /*

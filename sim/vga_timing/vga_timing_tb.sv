@@ -15,8 +15,6 @@ module vga_timing_tb;
 
     import vga_pkg::*;
 
-    vga_if timing_if();
-
 
     /**
      *  Local parameters
@@ -31,6 +29,12 @@ module vga_timing_tb;
 
     logic clk;
     logic rst;
+    logic [10:0] hcount;
+    logic [10:0] vcount;
+    logic hblnk;
+    logic vblnk;
+    logic hsync;
+    logic vsync;
 
     // wire [10:0] vcount, hcount;
     // wire        vsync,  hsync;
@@ -66,7 +70,12 @@ module vga_timing_tb;
     vga_timing dut (
     .clk(clk),
     .rst(rst),
-    .vga_out(timing_if)
+    .hcount,
+    .vcount,
+    .hblnk,
+    .vblnk,
+    .hsync,
+    .vsync
 );
 
     /**
@@ -81,25 +90,25 @@ module vga_timing_tb;
      */
 
     property hblnk_property;
-        @(posedge clk) (timing_if.hcount >= HBLNK_START - 1) && (timing_if.hcount < HBLNK_END - 1) |=> (timing_if.hblnk == 1);
+        @(posedge clk) (hcount >= HBLNK_START - 1) && (hcount < HBLNK_END - 1) |=> (hblnk == 1);
     endproperty
 
     property vblnk_property;
-        @(posedge clk) (timing_if.vcount >= VBLNK_START) && (timing_if.vcount < VBLNK_END) |=> (timing_if.vblnk == 1);
+        @(posedge clk) (vcount >= VBLNK_START) && (vcount < VBLNK_END) |=> (vblnk == 1);
     endproperty
 
     property hsync_property;
-        @(posedge clk) (timing_if.hcount >= H_SYNC_START - 1) && (timing_if.hcount < H_SYNC_END - 1) |=> (timing_if.hsync == 1);
+        @(posedge clk) (hcount >= H_SYNC_START - 1) && (hcount < H_SYNC_END - 1) |=> (hsync == 1);
     endproperty
 
     property vsync_property;
-        @(posedge clk) (timing_if.vcount >= V_SYNC_START) && (timing_if.vcount < V_SYNC_END) |=> (timing_if.vsync == 1);
+        @(posedge clk) (vcount >= V_SYNC_START) && (vcount < V_SYNC_END) |=> (vsync == 1);
     endproperty
 
-    assert property (hblnk_property) else $error("HBLANK FAIL: hcount=%d", timing_if.hcount);
-    assert property (vblnk_property) else $error("VBLANK FAIL: vcount=%d", timing_if.vcount);
-    assert property (hsync_property) else $error("HSYNC FAIL: hcount=%d", timing_if.hcount);
-    assert property (vsync_property) else $error("VSYNC FAIL: vcount=%d", timing_if.vcount);
+    assert property (hblnk_property) else $error("HBLANK FAIL: hcount=%d", hcount);
+    assert property (vblnk_property) else $error("VBLANK FAIL: vcount=%d", vcount);
+    assert property (hsync_property) else $error("HSYNC FAIL: hcount=%d", hcount);
+    assert property (vsync_property) else $error("VSYNC FAIL: vcount=%d", vcount);
 
 
 
@@ -111,9 +120,9 @@ module vga_timing_tb;
         @(posedge rst);
         @(negedge rst);
 
-        wait (timing_if.vsync == 1'b0);
-        @(negedge timing_if.vsync);
-        @(negedge timing_if.vsync);
+        wait (vsync == 1'b0);
+        @(negedge vsync);
+        @(negedge vsync);
 
         $finish;
     end

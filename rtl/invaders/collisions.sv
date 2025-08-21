@@ -25,43 +25,74 @@ module collisions #(
     input logic bullet_active,
 
     output logic [NUM_ROWS - 1:0][NUM_INVADERS - 1:0] collision,
-    output logic bullet_hit
+    output logic bullet_hit,
+    output logic player_hit
 );
 
 timeunit 1ns;
 timeprecision 1ps;
 
+import vga_pkg::*;
+
 logic [NUM_ROWS - 1:0][NUM_INVADERS - 1:0] collision_nxt;
 logic bullet_hit_nxt;
+logic player_hit_nxt;
+logic found_any_live = 0;
+int lowest_live_row = -1;
 
 always_ff @(posedge clk) begin
     if(rst) begin
         collision <= '1;
         bullet_hit <= '0;
+        player_hit <= '0;
     end else begin
         collision <= collision_nxt;
         bullet_hit <= bullet_hit_nxt;
+        player_hit <= player_hit_nxt;
     end
 end
 
 always_comb begin
     collision_nxt = collision;
     bullet_hit_nxt = 0;
+    player_hit_nxt = player_hit;
 
     if(bullet_active) begin
-        for(logic [NUM_ROWS - 1:0] i = 0; i < NUM_ROWS; i++) begin
-            for(logic [NUM_INVADERS - 1:0] j = 0; j < NUM_INVADERS; j++) begin
-                automatic logic [11:0] current_enemy_y = enemy_ypos + i * OFFSET;
+        for(logic [NUM_ROWS - 1:0] row = 0; row < NUM_ROWS; row++) begin
+            for(logic [NUM_INVADERS - 1:0] col = 0; col < NUM_INVADERS; col++) begin
+                automatic logic [11:0] current_enemy_y = enemy_ypos + row * OFFSET;
 
-                automatic logic x_overlap = (projectile_xpos <= invader_x_positions[j] + INVADER_WIDTH) && (projectile_xpos + PROJECTILE_WIDTH >= invader_x_positions[j]);
-                automatic logic y_overlap = (projectile_ypos <= current_enemy_y + INVADER_HEIGHT) && (projectile_ypos + PROJECTILE_HEIGHT >= current_enemy_y);
+                automatic logic x_overlap = (projectile_xpos <= invader_x_positions[col] + INVADER_WIDTH) 
+                                         && (projectile_xpos + PROJECTILE_WIDTH >= invader_x_positions[col]);
+                automatic logic y_overlap = (projectile_ypos <= current_enemy_y + INVADER_HEIGHT)
+                                         && (projectile_ypos + PROJECTILE_HEIGHT >= current_enemy_y);
 
-                if (x_overlap && y_overlap && collision[i][j]) begin
-                        collision_nxt[i][j] = 1'b0;
+                if (x_overlap && y_overlap && collision[row][col]) begin
+                        collision_nxt[row][col] = 1'b0;
                         bullet_hit_nxt = 1;
 
                 end
             end
+        end
+    end
+    
+    // Szukaj od najniższego do najwyższego rzędu
+    for(int row = NUM_ROWS - 1; row >= 0; row--) begin
+        if(|collision[row]) begin // Jeśli ten rząd ma żywych przeciwników
+            lowest_live_row = row;
+            found_any_live = 1;
+            break; // Znaleźliśmy najniższy żywy rząd
+        end
+
+        if(row == 0 && |collision[row] == 0) found_any_live = 0;
+    end
+    
+    // Sprawdź czy najniższy żywy przeciwnik dotarł do dołu ekranu
+    if(found_any_live) begin
+        automatic logic [11:0] enemy_bottom_y = enemy_ypos + (lowest_live_row * OFFSET) + INVADER_HEIGHT;
+        
+        if(enemy_bottom_y >= VER_PIXELS - (2 * OFFSET)) begin
+            player_hit_nxt = 1'b1;
         end
     end
 end

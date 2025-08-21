@@ -48,7 +48,6 @@ localparam MAX_POS_R = HOR_PIXELS - PLAYER_WIDTH - MOVEMENT_SPEED;
  * Internal signals
  */
 logic [11:0] xpos_nxt, xpos_shoot_nxt;
-logic [31:0] delay_counter;
 logic movement_enable;
 
 logic [11:0] bullet_y_nxt;
@@ -61,20 +60,13 @@ logic can_shoot, can_shoot_nxt;
 
 
 
-always_ff @(posedge clk) begin : clock_divide
-    if (rst) begin
-        delay_counter <= 0;
-        movement_enable <= 0;
-    end else begin
-        if (delay_counter >= MOVEMENT_DELAY) begin
-            delay_counter <= 0;
-            movement_enable <= 1;
-        end else begin
-            delay_counter <= delay_counter + 1;
-            movement_enable <= 0;
-        end
-    end
-end
+clk_divide #(
+    .CYCLES(MOVEMENT_DELAY)
+) u_clk_delay (
+    .clk,
+    .rst,
+    .clk_delayed(movement_enable)
+);
 
 always_ff @(posedge clk) begin : hold_hit
     if(bullet_hit) begin
