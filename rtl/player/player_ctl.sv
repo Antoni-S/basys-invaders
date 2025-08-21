@@ -20,6 +20,8 @@ module player_ctl #(
     input   logic           button_left,
     input   logic           button_right,
     input   logic           button_shoot,
+    input   logic           bullet_hit,
+
     output  logic [11:0]    xpos,
     output  logic [11:0]    xpos_shoot,
 	output  logic [11:0]    bullet_y,
@@ -46,27 +48,32 @@ localparam MAX_POS_R = HOR_PIXELS - PLAYER_WIDTH - MOVEMENT_SPEED;
  * Internal signals
  */
 logic [11:0] xpos_nxt, xpos_shoot_nxt;
-logic [31:0] delay_counter;
 logic movement_enable;
 
 logic [11:0] bullet_y_nxt;
 logic bullet_active_nxt;
+logic bullet_hit_d;
 logic can_shoot, can_shoot_nxt;
 /**
  * Internal logic
  */
 
-always_ff @(posedge clk) begin : clock_divide
-    if (rst) begin
-        delay_counter <= 0;
-        movement_enable <= 0;
+
+
+clk_divide #(
+    .CYCLES(MOVEMENT_DELAY)
+) u_clk_delay (
+    .clk,
+    .rst,
+    .clk_delayed(movement_enable)
+);
+
+always_ff @(posedge clk) begin : hold_hit
+    if(bullet_hit) begin
+        bullet_hit_d <= bullet_hit;
     end else begin
-        if (delay_counter >= MOVEMENT_DELAY) begin
-            delay_counter <= 0;
-            movement_enable <= 1;
-        end else begin
-            delay_counter <= delay_counter + 1;
-            movement_enable <= 0;
+        if(movement_enable) begin
+            bullet_hit_d <= bullet_hit;
         end
     end
 end
@@ -79,12 +86,14 @@ always_ff @(posedge clk) begin : movement_logic
 		bullet_y <= '0;
 		bullet_active <= '0;
 		can_shoot <= 1;
-    end else if (movement_enable) begin
-        xpos <= xpos_nxt;
-		xpos_shoot <= xpos_shoot_nxt;
-		bullet_y <= bullet_y_nxt;
-		bullet_active <= bullet_active_nxt;
-		can_shoot <= can_shoot_nxt;
+    end else begin
+        if (movement_enable) begin
+            xpos <= xpos_nxt;
+            xpos_shoot <= xpos_shoot_nxt;
+            bullet_y <= bullet_y_nxt;
+            can_shoot <= can_shoot_nxt;
+            bullet_active <= bullet_active_nxt;
+        end
     end
 end
 
@@ -113,7 +122,7 @@ always_comb begin : button_controller
 	if (bullet_active) begin
 		bullet_y_nxt = bullet_y - BULLET_SPEED;
 			
-		if (bullet_y <= BULLET_HEIGHT) begin
+		if (bullet_hit_d || bullet_y <= BULLET_HEIGHT) begin
 			bullet_active_nxt = 0;
 			can_shoot_nxt = 1;
 		end

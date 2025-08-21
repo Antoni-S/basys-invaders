@@ -40,9 +40,11 @@ set sv_files {
 	../rtl/keyboard/keyboard_ctl.sv
     ../rtl/misc/delay.sv
     ../rtl/misc/image_rom.sv
+    ../rtl/misc/clk_divide.sv
     ../rtl/player/player_ctl.sv
 	../rtl/invaders/display_invader.sv
 	../rtl/invaders/invader_move.sv
+    ../rtl/invaders/collisions.sv
     rtl/top_vga_basys3.sv
 }
 

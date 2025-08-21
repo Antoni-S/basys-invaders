@@ -10,8 +10,13 @@
 module draw_bg (
         input logic clk,
         input logic rst,
+        input logic [10:0] hcount,
+        input logic [10:0] vcount,
+        input logic        hblnk,
+        input logic        vblnk,
+        input logic        hsync,
+        input logic        vsync,
 
-        vga_if.in vga_in,
         vga_if.out vga_out
     );
 
@@ -42,18 +47,18 @@ module draw_bg (
             vga_out.hblnk  <= '0;
             vga_out.rgb    <= '0;
         end else begin
-            vga_out.vcount <= vga_in.vcount;
-            vga_out.vsync  <= vga_in.vsync;
-            vga_out.vblnk  <= vga_in.vblnk;
-            vga_out.hcount <= vga_in.hcount;
-            vga_out.hsync  <= vga_in.hsync;
-            vga_out.hblnk  <= vga_in.hblnk;
+            vga_out.vcount <= vcount;
+            vga_out.vsync  <= vsync;
+            vga_out.vblnk  <= vblnk;
+            vga_out.hcount <= hcount;
+            vga_out.hsync  <= hsync;
+            vga_out.hblnk  <= hblnk;
             vga_out.rgb    <= rgb_nxt;
         end
     end
 
     always_comb begin : bg_comb_blk
-        if (vga_in.vblnk || vga_in.hblnk) begin
+        if (vblnk || hblnk) begin
             rgb_nxt = 12'h0_0_0;
         end else begin
             rgb_nxt = 12'h0_0_f;
