@@ -57,6 +57,8 @@ module top_vga (
     vga_if invader_row2_to_invader_row3();
     vga_if invader_row3_to_output();
     vga_if vga_projectile_if();
+    vga_if vga_win_if();
+    vga_if vga_lose_if();
 
     //Wires
     logic [10:0] hcount;
@@ -84,6 +86,9 @@ module top_vga (
     wire bullet_hit;
     wire player_hit;
 
+    wire game_lost, game_won;
+    wire [11:0] win_addr, win_rgb;
+    wire [11:0] lose_addr, lose_rgb;
     /**
     * Signals assignments
     */
@@ -95,6 +100,9 @@ module top_vga (
     /**
     * Submodules instances
     */
+
+    //------------------- KEYBOARD ------------------------
+
 	PS2Receiver u_PS2Receiver (
 		.clk,
 		.kclk(PS2Clk),
@@ -109,6 +117,7 @@ module top_vga (
 		.button_right(buttonR),
 		.button_shoot(buttonU)
 	);
+    //------------------- BACKGROUND ------------------------
 
     vga_timing u_vga_timing (
         .clk,
@@ -132,6 +141,8 @@ module top_vga (
         .vsync,
         .vga_out (vga_bg_if.out)
     );
+
+    //------------------- PLAYER ------------------------
 
     player_ctl #(
 		.PLAYER_WIDTH(SPRITE_WIDTH),
@@ -159,12 +170,13 @@ module top_vga (
 	) u_player_rect (
         .clk,
         .rst,
-        .draw_in    (vga_projectile_if.in),
+        .draw_in    (vga_lose_if.in),
         .draw_out   (vga_player_if.out),
         .rgb_pixel  (player_rgb),
         .pixel_addr (player_addr),
         .xpos       (player_xpos),
-        .ypos       (player_ypos)
+        .ypos       (player_ypos),
+        .enabled    (1'b1)
     );
 
 	draw_rect #(
@@ -177,8 +189,9 @@ module top_vga (
 		.draw_out   (vga_projectile_if.out),
 		.rgb_pixel  (projectile_rgb),
 		.pixel_addr (projectile_addr),
-		.xpos       (bullet_active ? projectile_xpos : HOR_PIXELS),
-		.ypos       (bullet_active ? projectile_ypos : 0)
+		.xpos       (projectile_xpos),
+		.ypos       (projectile_ypos),
+        .enabled    (bullet_active)
 	);
 
     image_rom #("../../rtl/player/spaceship1.dat")
@@ -194,6 +207,8 @@ module top_vga (
         .address (projectile_addr),
         .rgb     (projectile_rgb)
     );
+
+    //------------------- GAME LOGIC ------------------------
 
     collisions #(
         .NUM_INVADERS(NUM_INVADERS),
@@ -216,6 +231,63 @@ module top_vga (
         .player_hit(player_hit)
     );
 
+    game_state #(
+        .NUM_INVADERS(NUM_INVADERS),
+        .NUM_ROWS(NUM_ROWS)
+    ) u_game_state (
+        .clk,
+        .rst,
+        .collision(collision),
+        .player_hit(player_hit),
+        .game_lost(game_lost),
+        .game_won(game_won)
+    );
+
+    draw_rect #(
+        .RECT_HEIGHT(64),
+        .RECT_WIDTH(256)
+    ) u_game_won_rect (
+        .clk,
+        .rst,
+        .draw_in(vga_projectile_if.in),
+        .draw_out(vga_win_if.out),
+        .enabled(game_won),
+        .pixel_addr(win_addr),
+        .rgb_pixel(win_rgb),
+        .xpos(12'(HOR_PIXELS / 3)),
+        .ypos(12'(VER_PIXELS / 4))
+    );
+
+    draw_rect #(
+        .RECT_HEIGHT(128),
+        .RECT_WIDTH(256)
+    ) u_game_lose_rect (
+        .clk,
+        .rst,
+        .draw_in(vga_win_if.in),
+        .draw_out(vga_lose_if.out),
+        .enabled(game_lost),
+        .pixel_addr(lose_addr),
+        .rgb_pixel(lose_rgb),
+        .xpos(12'(HOR_PIXELS / 3)),
+        .ypos(12'(VER_PIXELS / 4))
+    );
+
+    image_rom #("../../rtl/misc/win.dat")
+    u_win_rom (
+        .clk,
+        .address (win_addr),
+        .rgb     (win_rgb)
+    );
+
+    image_rom #("../../rtl/misc/lose.dat")
+    u_lose_rom (
+        .clk,
+        .address (lose_addr),
+        .rgb     (lose_rgb)
+    );
+
+    //------------------- INVADERS ------------------------
     /*
      * Row 1
      */

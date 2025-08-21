@@ -42,6 +42,7 @@ set sv_files {
     ../rtl/misc/image_rom.sv
     ../rtl/misc/clk_divide.sv
     ../rtl/player/player_ctl.sv
+    ../rtl/player/game_state.sv
 	../rtl/invaders/display_invader.sv
 	../rtl/invaders/invader_move.sv
     ../rtl/invaders/collisions.sv

@@ -14,8 +14,19 @@ module clk_divide #(
 
     output logic clk_delayed
 );
+/**
+ * Local parameters
+ */
+
+/**
+ * Internal signals
+ */
 
 logic [31:0] delay_counter;
+
+/**
+ * Internal logic
+ */
 
 always_ff @(posedge clk) begin
     if (rst) begin

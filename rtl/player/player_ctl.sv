@@ -54,6 +54,7 @@ logic [11:0] bullet_y_nxt;
 logic bullet_active_nxt;
 logic bullet_hit_d;
 logic can_shoot, can_shoot_nxt;
+
 /**
  * Internal logic
  */

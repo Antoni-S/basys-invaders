@@ -18,12 +18,22 @@ module keyboard_ctl (
 timeunit 1ns;
 timeprecision 1ps;
 
+/**
+ * Local parameters
+ */
 localparam LEFT = 8'h1C;
 localparam RIGHT = 8'h23;
 localparam UP = 8'h1D;
 localparam STOP = 8'hF0;
 
+/**
+ * Internal signals
+ */
 logic btnL_nxt, btnR_nxt, btnU_nxt;
+
+/**
+ * Internal logic
+ */
 
 always_ff @(posedge clk) begin
 	if(keycode[15:8] == STOP && keycode[7:0] == RIGHT) begin
