@@ -14,10 +14,12 @@
  */
 
 module image_rom #(
-    parameter FILE="../../rtl/misc/placeholder.dat"
+    parameter FILE="../../rtl/misc/placeholder.dat",
+    parameter SIZE = 12,
+    parameter SIZE_DEC = 4096
     )(
         input  logic clk ,
-        input  logic [11:0] address,  // address = {addry[5:0], addrx[5:0]}
+        input  logic [SIZE - 1:0] address,  // address = {addry[5:0], addrx[5:0]}
         output logic [11:0] rgb
     );
 
@@ -26,7 +28,7 @@ module image_rom #(
      * Local variables and signals
      */
 
-    reg [11:0] rom [0:4095];
+    reg [SIZE - 1:0] rom [0:SIZE_DEC - 1];
 
 
     /**

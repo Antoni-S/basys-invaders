@@ -34,11 +34,22 @@ timeprecision 1ps;
 
 import vga_pkg::*;
 
+/**
+ * Local parameters
+ */
+
+/**
+ * Internal signals
+ */
 logic [NUM_ROWS - 1:0][NUM_INVADERS - 1:0] collision_nxt;
 logic bullet_hit_nxt;
 logic player_hit_nxt;
-logic found_any_live = 0;
-int lowest_live_row = -1;
+logic found_any_live;
+logic [$clog2(NUM_ROWS)-1:0] lowest_live_row;
+
+/**
+ * Internal logic
+ */
 
 always_ff @(posedge clk) begin
     if(rst) begin
@@ -76,18 +87,15 @@ always_comb begin
         end
     end
     
-    // Szukaj od najniższego do najwyższego rzędu
     for(int row = NUM_ROWS - 1; row >= 0; row--) begin
-        if(|collision[row]) begin // Jeśli ten rząd ma żywych przeciwników
+        if(|collision[row]) begin
             lowest_live_row = row;
             found_any_live = 1;
-            break; // Znaleźliśmy najniższy żywy rząd
+            break;
         end
-
-        if(row == 0 && |collision[row] == 0) found_any_live = 0;
     end
     
-    // Sprawdź czy najniższy żywy przeciwnik dotarł do dołu ekranu
+
     if(found_any_live) begin
         automatic logic [11:0] enemy_bottom_y = enemy_ypos + (lowest_live_row * OFFSET) + INVADER_HEIGHT;
         

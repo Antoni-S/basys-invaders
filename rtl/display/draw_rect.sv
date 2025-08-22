@@ -2,7 +2,9 @@
 
 module draw_rect #(
 	parameter RECT_WIDTH = 32,
-	parameter RECT_HEIGHT = 32
+	parameter RECT_HEIGHT = 32,
+    parameter CLK_DELAY = 1,
+    parameter SIZE = 12
 )
 (
     input   logic     clk,
@@ -10,8 +12,9 @@ module draw_rect #(
     input   logic    [11:0]  xpos,
     input   logic    [11:0]  ypos,
     input   logic    [11:0]  rgb_pixel,
+    input   logic            enabled,
     
-    output  logic    [11:0]  pixel_addr,
+    output  logic    [SIZE - 1:0]  pixel_addr,
     vga_if.in     draw_in,
     vga_if.out    draw_out
 );
@@ -26,8 +29,6 @@ import vga_pkg::*;
  * Local variables and signals
  */
 
-localparam ANIMATION_FRAME = 0;
-
 /**
  * Internal logic
  */
@@ -36,7 +37,7 @@ vga_if draw_delay();
 
 delay #(
     .WIDTH (38),
-    .CLK_DEL(1)
+    .CLK_DEL(CLK_DELAY)
 ) u_delay (
     .clk  (clk),
     .rst  (rst),
@@ -66,15 +67,14 @@ always_ff @(posedge clk) begin
     end
 end
 
-assign pixel_addr = (draw_in.vcount-ypos) * RECT_WIDTH + (draw_in.hcount - xpos);// + (RECT_WIDTH * ANIMATION_FRAME);
-// To get the proper image scale from the tilesheet you need to pass the amount of sprites in the sheet times sprite height
-// For animation, to get the frame you want, pass the frame no. (indexing from 0) times sprite width
+assign pixel_addr = (draw_in.vcount-ypos) * RECT_WIDTH + (draw_in.hcount - xpos);
 
 
 
 always_comb begin : rect_comb_blk
         if(draw_delay.hcount >= xpos && draw_delay.hcount < xpos + RECT_WIDTH &&
-           draw_delay.vcount >= ypos && draw_delay.vcount < ypos + RECT_HEIGHT)
+           draw_delay.vcount >= ypos && draw_delay.vcount < ypos + RECT_HEIGHT &&
+           enabled)
 			if(rgb_pixel == 12'h0_0_0) rgb_nxt = draw_delay.rgb;
 			else rgb_nxt = rgb_pixel;
         else
