@@ -89,8 +89,9 @@ module top_vga (
 
     wire game_lost, game_won;
     wire game_won_delayed;
-    wire [11:0] win_addr, win_rgb;
-    wire [11:0] lose_addr, lose_rgb;
+    wire [11:0] win_rgb, lose_rgb;
+    wire [14:0] lose_addr;
+    wire [13:0] win_addr;
     /**
     * Signals assignments
     */
@@ -385,7 +386,8 @@ module top_vga (
 
     draw_rect #(
         .RECT_HEIGHT(64),
-        .RECT_WIDTH(256)
+        .RECT_WIDTH(256),
+        .SIZE(14)
     ) u_game_won_rect (
         .clk,
         .rst,
@@ -400,7 +402,8 @@ module top_vga (
 
     draw_rect #(
         .RECT_HEIGHT(128),
-        .RECT_WIDTH(256)
+        .RECT_WIDTH(256),
+        .SIZE(15)
     ) u_game_lose_rect (
         .clk,
         .rst,
@@ -413,14 +416,22 @@ module top_vga (
         .ypos(12'(VER_PIXELS / 4))
     );
 
-    image_rom #("../../rtl/misc/win.dat")
+    image_rom #(
+        .FILE("../../rtl/misc/win.dat"),
+        .SIZE(14),
+        .SIZE_DEC(16384)
+        )
     u_win_rom (
         .clk,
         .address (win_addr),
         .rgb     (win_rgb)
     );
 
-    image_rom #("../../rtl/misc/lose.dat")
+    image_rom #(
+        .FILE("../../rtl/misc/lose.dat"),
+        .SIZE(15),
+        .SIZE_DEC(32768)
+        )
     u_lose_rom (
         .clk,
         .address (lose_addr),

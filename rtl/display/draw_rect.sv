@@ -2,7 +2,9 @@
 
 module draw_rect #(
 	parameter RECT_WIDTH = 32,
-	parameter RECT_HEIGHT = 32
+	parameter RECT_HEIGHT = 32,
+    parameter CLK_DELAY = 1,
+    parameter SIZE = 12
 )
 (
     input   logic     clk,
@@ -12,7 +14,7 @@ module draw_rect #(
     input   logic    [11:0]  rgb_pixel,
     input   logic            enabled,
     
-    output  logic    [11:0]  pixel_addr,
+    output  logic    [SIZE - 1:0]  pixel_addr,
     vga_if.in     draw_in,
     vga_if.out    draw_out
 );
@@ -35,7 +37,7 @@ vga_if draw_delay();
 
 delay #(
     .WIDTH (38),
-    .CLK_DEL(1)
+    .CLK_DEL(CLK_DELAY)
 ) u_delay (
     .clk  (clk),
     .rst  (rst),
