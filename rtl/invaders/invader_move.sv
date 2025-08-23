@@ -12,6 +12,7 @@ module invader_move #(
 ) (
     input logic clk65MHz,
     input logic rst,
+    input logic game_start,
     
     output logic [9:0] xpos,
     output logic [9:0] ypos
@@ -71,7 +72,7 @@ module invader_move #(
         state_nxt = state;
         
         case (state)
-            IDLE:       state_nxt = RIGHT;
+            IDLE:       state_nxt = game_start ? RIGHT : IDLE;
             RIGHT:     if (move_counter >= OFFSET) state_nxt = DOWN_RIGHT;
             DOWN_RIGHT: state_nxt = LEFT;
             LEFT:      if (move_counter >= OFFSET) state_nxt = DOWN_LEFT;

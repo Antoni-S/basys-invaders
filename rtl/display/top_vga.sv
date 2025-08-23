@@ -51,6 +51,8 @@ module top_vga (
 
     // VGA interface
     vga_if vga_bg_if();
+    vga_if vga_title_if();
+    vga_if vga_start_if();
     vga_if vga_sync_if();
     vga_if vga_player_if();
 	vga_if bg_to_invader_row1();
@@ -69,12 +71,16 @@ module top_vga (
     logic hsync;
     logic vsync;
 
+    wire [11:0] title_rgb, prompt_rgb;
+    wire [14:0] title_addr;
+    wire [13:0] prompt_addr;
+
     wire [11:0] player_addr, player_rgb, player_xpos;
 	wire [11:0] player_ypos = VER_PIXELS - SPRITE_HEIGHT;
     wire [11:0] projectile_addr, projectile_rgb, projectile_xpos, projectile_ypos;
 	wire bullet_active;
 	wire [15:0] ps2_keycode;
-	wire buttonL, buttonR, buttonU;
+	wire buttonL, buttonR, buttonU, buttonE;
 
 	wire[11:0] image_addr_row1, image_rgb_row1;
     wire[11:0] image_addr_row2, image_rgb_row2;
@@ -87,7 +93,7 @@ module top_vga (
     wire bullet_hit;
     wire player_hit;
 
-    wire game_lost, game_won;
+    wire game_lost, game_won, game_start;
     wire game_won_delayed;
     wire [11:0] win_rgb, lose_rgb;
     wire [14:0] lose_addr;
@@ -95,10 +101,10 @@ module top_vga (
     /**
     * Signals assignments
     */
-	
-    assign vs = game_lost ? vga_lose_if.vsync : game_won ? vga_win_if.vsync : invader_row3_to_output.vsync;
-    assign hs = game_lost ? vga_lose_if.hsync : game_won ? vga_win_if.hsync : invader_row3_to_output.hsync;
-    assign {r,g,b} = game_lost ? vga_lose_if.rgb : game_won ? vga_win_if.rgb : invader_row3_to_output.rgb;
+    
+    assign vs = !game_start ? vga_start_if.vsync : game_lost ? vga_lose_if.vsync : game_won ? vga_win_if.vsync : invader_row3_to_output.vsync;
+    assign hs = !game_start ? vga_start_if.hsync : game_lost ? vga_lose_if.hsync : game_won ? vga_win_if.hsync : invader_row3_to_output.hsync;
+    assign {r,g,b} = !game_start ? vga_start_if.rgb : game_lost ? vga_lose_if.rgb : game_won ? vga_win_if.rgb : invader_row3_to_output.rgb;
 
     /**
     * Submodules instances
@@ -115,10 +121,12 @@ module top_vga (
 
 	keyboard_ctl u_keyboard_ctl (
 		.clk,
+        .rst,
 		.keycode(ps2_keycode),
 		.button_left(buttonL),
 		.button_right(buttonR),
-		.button_shoot(buttonU)
+		.button_shoot(buttonU),
+        .buttonE(buttonE)
 	);
     //------------------- BACKGROUND ------------------------
 
@@ -143,6 +151,60 @@ module top_vga (
         .hsync,
         .vsync,
         .vga_out (vga_bg_if.out)
+    );
+
+    draw_rect #(
+        .RECT_HEIGHT(128),
+        .RECT_WIDTH(256),
+        .SIZE(15)
+    ) u_game_title_rect (
+        .clk,
+        .rst,
+        .draw_in(vga_bg_if.in),
+        .draw_out(vga_title_if.out),
+        .enabled(!game_start),
+        .pixel_addr(title_addr),
+        .rgb_pixel(title_rgb),
+        .xpos(12'(HOR_PIXELS / 2 - 128)),
+        .ypos(12'(VER_PIXELS / 4))
+    );
+
+    image_rom #(
+        .FILE("../../rtl/display/title.dat"),
+        .SIZE(15),
+        .SIZE_DEC(32768)
+        )
+    u_title_rom (
+        .clk,
+        .address (title_addr),
+        .rgb     (title_rgb)
+    );
+
+    draw_rect #(
+        .RECT_HEIGHT(64),
+        .RECT_WIDTH(256),
+        .SIZE(14)
+    ) u_game_prompt_rect (
+        .clk,
+        .rst,
+        .draw_in(vga_title_if.in),
+        .draw_out(vga_start_if.out),
+        .enabled(!game_start),
+        .pixel_addr(prompt_addr),
+        .rgb_pixel(prompt_rgb),
+        .xpos(12'(HOR_PIXELS / 2 - 128)),
+        .ypos(12'(3 * (VER_PIXELS / 4)))
+    );
+
+    image_rom #(
+        .FILE("../../rtl/display/start_prompt.dat"),
+        .SIZE(14),
+        .SIZE_DEC(16384)
+        )
+    u_prompt_rom (
+        .clk,
+        .address (prompt_addr),
+        .rgb     (prompt_rgb)
     );
 
     delay #(
@@ -172,6 +234,8 @@ module top_vga (
         .button_left  (buttonL),
         .button_right (buttonR),
         .button_shoot (buttonU),
+        .buttonE      (buttonE),
+        .game_start   (game_start),
         .xpos         (player_xpos),
 		.xpos_shoot   (projectile_xpos),
 		.bullet_y     (projectile_ypos),
@@ -260,7 +324,7 @@ module top_vga (
 
     delay #(
     .WIDTH(1),
-    .CLK_DEL(3)  // Opóźnienie odpowiadające opóźnieniom VGA
+    .CLK_DEL(3)
     ) u_game_won_delay (
         .clk(clk),
         .rst(rst),
@@ -377,6 +441,7 @@ module top_vga (
     ) u_invader_move (
         .clk65MHz(clk),
         .rst(rst),
+        .game_start(game_start),
 
         .xpos(enemy_xpos),
         .ypos(enemy_ypos)

@@ -20,8 +20,10 @@ module player_ctl #(
     input   logic           button_left,
     input   logic           button_right,
     input   logic           button_shoot,
+    input   logic           buttonE,
     input   logic           bullet_hit,
 
+    output  logic           game_start,
     output  logic [11:0]    xpos,
     output  logic [11:0]    xpos_shoot,
 	output  logic [11:0]    bullet_y,
@@ -47,6 +49,7 @@ localparam MAX_POS_R = HOR_PIXELS - PLAYER_WIDTH - MOVEMENT_SPEED;
 /**
  * Internal signals
  */
+logic game_start_nxt;
 logic [11:0] xpos_nxt, xpos_shoot_nxt;
 logic movement_enable;
 
@@ -82,6 +85,7 @@ end
 
 always_ff @(posedge clk) begin : movement_logic
     if (rst) begin
+        game_start <= '0;
         xpos <= INITIAL_POS;
 		xpos_shoot <= '0;
 		bullet_y <= '0;
@@ -89,6 +93,7 @@ always_ff @(posedge clk) begin : movement_logic
 		can_shoot <= 1;
     end else begin
         if (movement_enable) begin
+            game_start <= game_start_nxt;
             xpos <= xpos_nxt;
             xpos_shoot <= xpos_shoot_nxt;
             bullet_y <= bullet_y_nxt;
@@ -99,12 +104,14 @@ always_ff @(posedge clk) begin : movement_logic
 end
 
 always_comb begin : button_controller
+    game_start_nxt = buttonE ? 1 : game_start;
     xpos_nxt = xpos;
 	xpos_shoot_nxt = xpos_shoot;
 	bullet_y_nxt = bullet_y;
 	bullet_active_nxt = bullet_active;
 	can_shoot_nxt = can_shoot;
     
+
     if (button_left && !button_right) begin
         if (xpos > MOVEMENT_SPEED) begin
             xpos_nxt = xpos - MOVEMENT_SPEED;
