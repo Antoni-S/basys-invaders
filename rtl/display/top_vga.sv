@@ -128,6 +128,22 @@ module top_vga (
 		.button_shoot(buttonU),
         .buttonE(buttonE)
 	);
+
+    //------------------- UART ------------------------
+
+    uart u_uart (
+        .clk,
+        .reset(rst),
+        .r_data,
+        .w_data,
+        .rd_uart,
+        .wr_uart,
+        .rx,
+        .tx,
+        .rx_empty,
+        .tx_full
+    );
+
     //------------------- BACKGROUND ------------------------
 
     vga_timing u_vga_timing (

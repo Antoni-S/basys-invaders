@@ -16,12 +16,14 @@
 module top_vga_basys3 (
         input  wire clk,
         input  wire btnC,
+        input  wire Rx,
         output wire Vsync,
         output wire Hsync,
         output wire [3:0] vgaRed,
         output wire [3:0] vgaGreen,
         output wire [3:0] vgaBlue,
         output wire JA1,
+        output wire Tx,
 		inout  wire PS2Clk,
 		inout  wire PS2Data
     );
@@ -48,6 +50,26 @@ module top_vga_basys3 (
     /**
      * FPGA submodules placement
      */
+
+    uart #(
+        .DBIT(8),
+        .SB_TICK(16),
+        .DVSR(35),
+        .DVSR_BIT(6),
+        .FIFO_W(6)
+    ) uart_unit (
+        .clk(clk65MHz),
+        .reset(btnC),
+        .wr_uart(uart_wr),
+        .w_data(uart_data),
+        .tx_full(tx_full),
+        .tx(JA2),
+        .rx(JB1),
+        .rd_uart(uart_rd),
+        .r_data(r_data),
+        .rx_empty(rx_empty)
+    );
+
 
     clk_wiz_0_clk_wiz inst(
         // Clock out ports  
