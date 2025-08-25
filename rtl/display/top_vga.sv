@@ -16,11 +16,14 @@ module top_vga (
         input  logic clk100MHz,
         input  logic clk, //65MHz clock
         input  logic rst,
+
         output logic vs,
         output logic hs,
         output logic [3:0] r,
         output logic [3:0] g,
         output logic [3:0] b,
+        output logic [11:0] player_xpos,
+
 		inout  logic PS2Clk,
 		inout  logic PS2Data
     );
@@ -75,7 +78,7 @@ module top_vga (
     wire [14:0] title_addr;
     wire [13:0] prompt_addr;
 
-    wire [11:0] player_addr, player_rgb, player_xpos;
+    wire [11:0] player_addr, player_rgb;
 	wire [11:0] player_ypos = VER_PIXELS - SPRITE_HEIGHT;
     wire [11:0] projectile_addr, projectile_rgb, projectile_xpos, projectile_ypos;
 	wire bullet_active;
@@ -121,28 +124,12 @@ module top_vga (
 
 	keyboard_ctl u_keyboard_ctl (
 		.clk,
-        .rst,
 		.keycode(ps2_keycode),
 		.button_left(buttonL),
 		.button_right(buttonR),
 		.button_shoot(buttonU),
         .buttonE(buttonE)
 	);
-
-    //------------------- UART ------------------------
-
-    uart u_uart (
-        .clk,
-        .reset(rst),
-        .r_data,
-        .w_data,
-        .rd_uart,
-        .wr_uart,
-        .rx,
-        .tx,
-        .rx_empty,
-        .tx_full
-    );
 
     //------------------- BACKGROUND ------------------------
 

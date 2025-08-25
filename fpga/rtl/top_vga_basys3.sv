@@ -39,6 +39,16 @@ module top_vga_basys3 (
     wire clk65MHz;
     wire clk65MHz_mirror;
     wire locked;
+    wire [11:0] player_xpos;
+
+    logic [7:0] w_data;
+    logic wr_uart;
+    logic tx_full;
+    logic uart_tx;
+    logic [7:0] r_data;
+    logic rd_uart;
+    logic rx_empty;
+    logic uart_rx;
 
     /**
      * Signals assignments
@@ -52,24 +62,34 @@ module top_vga_basys3 (
      */
 
     uart #(
-        .DBIT(8),
-        .SB_TICK(16),
-        .DVSR(35),
-        .DVSR_BIT(6),
-        .FIFO_W(6)
-    ) uart_unit (
-        .clk(clk65MHz),
-        .reset(btnC),
-        .wr_uart(uart_wr),
-        .w_data(uart_data),
-        .tx_full(tx_full),
-        .tx(JA2),
-        .rx(JB1),
-        .rd_uart(uart_rd),
-        .r_data(r_data),
-        .rx_empty(rx_empty)
+            .DBIT(8),
+            .SB_TICK(16),
+            .DVSR(35),
+            .DVSR_BIT(6),
+            .FIFO_W(6)
+        ) u_uart (
+            .clk(clk65MHz),
+            .reset(btnC),
+            .rd_uart(rd_uart),
+            .wr_uart(wr_uart),
+            .rx(Rx),
+            .w_data(w_data),
+            .tx_full(tx_full),
+            .rx_empty(rx_empty),
+            .tx(Tx),
+            .r_data(r_data)
     );
 
+    coop_comm_test #(
+        .FCLK_HZ(65_000_000)
+    )u_coop_comm_test (
+        .clk(clk65MHz),
+        .rst(btnC),
+        .player_xpos(player_xpos),
+        .tx_full(tx_full),
+        .w_data(w_data),
+        .wr_uart(wr_uart)
+    );
 
     clk_wiz_0_clk_wiz inst(
         // Clock out ports  
@@ -109,7 +129,8 @@ module top_vga_basys3 (
         .hs(Hsync),
         .vs(Vsync),
 		.PS2Clk(PS2Clk),
-		.PS2Data(PS2Data)
+		.PS2Data(PS2Data),
+        .player_xpos(player_xpos)
     );
 
 endmodule

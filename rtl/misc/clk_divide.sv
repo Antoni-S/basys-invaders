@@ -1,11 +1,13 @@
-/**
- * Copyright (C) 2025  AGH University of Science and Technology
- * MTM UEC2
- * Author: Antoni Sus
- *
- * Description:
- * Simple clock divider
+//////////////////////////////////////////////////////////////////////////////
+/*
+ Module name:   clk_divide
+ Author:        Antoni Sus
+ Version:       1.0
+ Last modified: 2025-08-25
+ Coding style: safe with FPGA sync reset
+ Description:  Simple clock divider
  */
+//////////////////////////////////////////////////////////////////////////////
 module clk_divide #(
     parameter CYCLES = 650000
 ) (
@@ -14,20 +16,19 @@ module clk_divide #(
 
     output logic clk_delayed
 );
-/**
- * Local parameters
- */
+//------------------------------------------------------------------------------
+// local parameters
+//------------------------------------------------------------------------------
 
-/**
- * Internal signals
- */
+//------------------------------------------------------------------------------
+// local variables
+//------------------------------------------------------------------------------
 
 logic [31:0] delay_counter;
 
-/**
- * Internal logic
- */
-
+//------------------------------------------------------------------------------
+// output register with sync reset
+//------------------------------------------------------------------------------
 always_ff @(posedge clk) begin
     if (rst) begin
         delay_counter <= 0;

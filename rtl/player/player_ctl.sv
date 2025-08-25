@@ -1,11 +1,13 @@
-/**
- * Copyright (C) 2025  AGH University of Science and Technology
- * MTM UEC2
- * Author: Antoni Sus
- *
- * Description:
- * Simple player controller for a "Space Invaders"-like game
+//////////////////////////////////////////////////////////////////////////////
+/*
+ Module name:   keyboard_ctl
+ Author:        Antoni Sus
+ Version:       1.0
+ Last modified: 2025-08-25
+ Coding style: safe with FPGA sync reset
+ Description:  Simple player controller for a "Space Invaders"-like game
  */
+//////////////////////////////////////////////////////////////////////////////
 
 module player_ctl #(
 	parameter PLAYER_WIDTH = 32,
@@ -36,19 +38,16 @@ timeprecision 1ps;
 
 import vga_pkg::*;
 
-/**
- * Local parameters
- */
+//------------------------------------------------------------------------------
+// local parameters
+//------------------------------------------------------------------------------
 localparam MOVEMENT_DELAY = 650000;
 localparam INITIAL_POS = HOR_PIXELS / 2;
 localparam MAX_POS_R = HOR_PIXELS - PLAYER_WIDTH - MOVEMENT_SPEED;
 
-
-
-
-/**
- * Internal signals
- */
+//------------------------------------------------------------------------------
+// local variables
+//------------------------------------------------------------------------------
 logic game_start_nxt;
 logic [11:0] xpos_nxt, xpos_shoot_nxt;
 logic movement_enable;
@@ -58,31 +57,9 @@ logic bullet_active_nxt;
 logic bullet_hit_d;
 logic can_shoot, can_shoot_nxt;
 
-/**
- * Internal logic
- */
-
-
-
-clk_divide #(
-    .CYCLES(MOVEMENT_DELAY)
-) u_clk_delay (
-    .clk,
-    .rst,
-    .clk_delayed(movement_enable)
-);
-
-always_ff @(posedge clk) begin : hold_hit
-    if(bullet_hit) begin
-        bullet_hit_d <= bullet_hit;
-    end else begin
-        if(movement_enable) begin
-            bullet_hit_d <= bullet_hit;
-        end
-    end
-end
-
-
+//------------------------------------------------------------------------------
+// output register with sync reset
+//------------------------------------------------------------------------------
 always_ff @(posedge clk) begin : movement_logic
     if (rst) begin
         game_start <= '0;
@@ -99,6 +76,29 @@ always_ff @(posedge clk) begin : movement_logic
             bullet_y <= bullet_y_nxt;
             can_shoot <= can_shoot_nxt;
             bullet_active <= bullet_active_nxt;
+        end
+    end
+end
+
+//------------------------------------------------------------------------------
+// logic
+//------------------------------------------------------------------------------
+
+clk_divide #(
+    .CYCLES(MOVEMENT_DELAY)
+) u_clk_delay (
+    .clk,
+    .rst,
+    .clk_delayed(movement_enable)
+);
+
+
+always_ff @(posedge clk) begin : hold_hit
+    if(bullet_hit) begin
+        bullet_hit_d <= bullet_hit;
+    end else begin
+        if(movement_enable) begin
+            bullet_hit_d <= bullet_hit;
         end
     end
 end
