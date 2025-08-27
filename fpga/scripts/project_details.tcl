@@ -39,6 +39,8 @@ set sv_files {
     ../rtl/display/vga_timing.sv
 	../rtl/keyboard/keyboard_ctl.sv
     ../rtl/uart/coop_comm_test.sv
+    ../rtl/uart/coop_comm_tx.sv
+    ../rtl/uart/coop_comm_rx.sv
     ../rtl/misc/delay.sv
     ../rtl/misc/image_rom.sv
     ../rtl/misc/clk_divide.sv

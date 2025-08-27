@@ -31,8 +31,13 @@ localparam int CYCLES = (FCLK_HZ/1000) * SEND_PERIOD_MS;
 // local variables
 //------------------------------------------------------------------------------
 logic tick;
-typedef enum logic [1:0] {S_IDLE, S_SEND, S_GAP} state_t;
-state_t state, state_nxt;
+
+enum logic [1:0] {
+    S_IDLE,
+    S_SEND,
+    S_GAP
+} state, state_nxt;
+
 logic [2:0] idx, idx_nxt;
 logic       wr_uart_nxt;
 logic [7:0] w_data_nxt;
