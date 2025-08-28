@@ -12,15 +12,26 @@
  * The project top module.
  */
  
-module top_vga (
+module top_vga #(
+    parameter NUM_INVADERS = 10,
+    parameter NUM_ROWS = 3
+)(
         input  logic clk100MHz,
         input  logic clk, //65MHz clock
         input  logic rst,
+        input logic [11:0] remote_xpos,
+        input logic remote_fire,
+        input logic [NUM_ROWS - 1:0][NUM_INVADERS - 1:0] remote_collisions,
+
         output logic vs,
         output logic hs,
         output logic [3:0] r,
         output logic [3:0] g,
         output logic [3:0] b,
+        output logic [11:0] player_xpos,
+        output logic buttonU,
+        output logic [NUM_ROWS - 1:0][NUM_INVADERS - 1:0] collision,
+
 		inout  logic PS2Clk,
 		inout  logic PS2Data
     );
@@ -45,8 +56,6 @@ module top_vga (
     localparam ENEMY_INIT_X = 0;
     localparam INVADER_HEIGHT = 32;
     localparam INVADER_WIDTH = 64;
-	localparam NUM_INVADERS = 10;
-    localparam NUM_ROWS = 3;
     localparam OFFSET = 100;
 
     // VGA interface
@@ -54,11 +63,11 @@ module top_vga (
     vga_if vga_title_if();
     vga_if vga_start_if();
     vga_if vga_sync_if();
+    vga_if vga_remote_player_if();
     vga_if vga_player_if();
-	vga_if bg_to_invader_row1();
-    vga_if invader_row1_to_invader_row2();
-    vga_if invader_row2_to_invader_row3();
-    vga_if invader_row3_to_output();
+    vga_if vga_invader_row1_if();
+    vga_if vga_invader_row2_if();
+    vga_if vga_invader_row3_if();
     vga_if vga_projectile_if();
     vga_if vga_win_if();
     vga_if vga_lose_if();
@@ -75,12 +84,13 @@ module top_vga (
     wire [14:0] title_addr;
     wire [13:0] prompt_addr;
 
-    wire [11:0] player_addr, player_rgb, player_xpos;
+    wire [11:0] player_addr, player_rgb;
+    wire [11:0] remote_addr, remote_rgb;
 	wire [11:0] player_ypos = VER_PIXELS - SPRITE_HEIGHT;
     wire [11:0] projectile_addr, projectile_rgb, projectile_xpos, projectile_ypos;
 	wire bullet_active;
 	wire [15:0] ps2_keycode;
-	wire buttonL, buttonR, buttonU, buttonE;
+	wire buttonL, buttonR, buttonE;
 
 	wire[11:0] image_addr_row1, image_rgb_row1;
     wire[11:0] image_addr_row2, image_rgb_row2;
@@ -89,7 +99,6 @@ module top_vga (
     wire[9:0]  enemy_xpos, enemy_ypos;
     wire [NUM_INVADERS-1:0][11:0] invader_x_positions;
 
-    wire [NUM_ROWS - 1:0][NUM_INVADERS - 1:0] collision;
     wire bullet_hit;
     wire player_hit;
 
@@ -102,9 +111,9 @@ module top_vga (
     * Signals assignments
     */
     
-    assign vs = !game_start ? vga_start_if.vsync : game_lost ? vga_lose_if.vsync : game_won ? vga_win_if.vsync : invader_row3_to_output.vsync;
-    assign hs = !game_start ? vga_start_if.hsync : game_lost ? vga_lose_if.hsync : game_won ? vga_win_if.hsync : invader_row3_to_output.hsync;
-    assign {r,g,b} = !game_start ? vga_start_if.rgb : game_lost ? vga_lose_if.rgb : game_won ? vga_win_if.rgb : invader_row3_to_output.rgb;
+    assign vs = !game_start ? vga_start_if.vsync : game_lost ? vga_lose_if.vsync : game_won ? vga_win_if.vsync : vga_invader_row3_if.vsync;
+    assign hs = !game_start ? vga_start_if.hsync : game_lost ? vga_lose_if.hsync : game_won ? vga_win_if.hsync : vga_invader_row3_if.hsync;
+    assign {r,g,b} = !game_start ? vga_start_if.rgb : game_lost ? vga_lose_if.rgb : game_won ? vga_win_if.rgb : vga_invader_row3_if.rgb;
 
     /**
     * Submodules instances
@@ -121,13 +130,13 @@ module top_vga (
 
 	keyboard_ctl u_keyboard_ctl (
 		.clk,
-        .rst,
 		.keycode(ps2_keycode),
 		.button_left(buttonL),
 		.button_right(buttonR),
 		.button_shoot(buttonU),
         .buttonE(buttonE)
 	);
+
     //------------------- BACKGROUND ------------------------
 
     vga_timing u_vga_timing (
@@ -246,10 +255,24 @@ module top_vga (
     draw_rect #(
 		.RECT_WIDTH(SPRITE_WIDTH),
 		.RECT_HEIGHT(SPRITE_HEIGHT)
-	) u_player_rect (
+	) u_remote_player_rect (
         .clk,
         .rst,
         .draw_in    (vga_projectile_if.in),
+        .draw_out   (vga_remote_player_if.out),
+        .rgb_pixel  (remote_rgb),
+        .pixel_addr (remote_addr),
+        .xpos       (remote_xpos + SPRITE_WIDTH),
+        .ypos       (player_ypos),
+        .enabled    (1'b1)
+    );
+    draw_rect #(
+		.RECT_WIDTH(SPRITE_WIDTH),
+		.RECT_HEIGHT(SPRITE_HEIGHT)
+	) u_player_rect (
+        .clk,
+        .rst,
+        .draw_in    (vga_remote_player_if.in),
         .draw_out   (vga_player_if.out),
         .rgb_pixel  (player_rgb),
         .pixel_addr (player_addr),
@@ -278,6 +301,13 @@ module top_vga (
         .clk,
         .address (player_addr),
         .rgb     (player_rgb)
+    );
+
+    image_rom #("../../rtl/player/spaceship2.dat")
+    u_remote_player_rom (
+        .clk,
+        .address (remote_addr),
+        .rgb     (remote_rgb)
     );
 
 	image_rom #("../../rtl/player/projectile.dat")
@@ -349,7 +379,7 @@ module top_vga (
         .rst,
 
         .vga_in(vga_player_if.in),
-        .vga_out(invader_row1_to_invader_row2.out),
+        .vga_out(vga_invader_row1_if.out),
 
         .xpos(enemy_xpos),
         .ypos(enemy_ypos),
@@ -382,8 +412,8 @@ module top_vga (
         .clk65MHz(clk),
         .rst(rst),
 
-        .vga_in(invader_row1_to_invader_row2.in),
-        .vga_out(invader_row2_to_invader_row3.out),
+        .vga_in(vga_invader_row1_if.in),
+        .vga_out(vga_invader_row2_if.out),
 
         .xpos(enemy_xpos),
         .ypos(enemy_ypos),
@@ -416,8 +446,8 @@ module top_vga (
         .clk65MHz(clk),
         .rst(rst),
 
-        .vga_in(invader_row2_to_invader_row3.in),
-        .vga_out(invader_row3_to_output.out),
+        .vga_in(vga_invader_row2_if.in),
+        .vga_out(vga_invader_row3_if.out),
 
         .xpos(enemy_xpos),
         .ypos(enemy_ypos),

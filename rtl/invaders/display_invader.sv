@@ -1,11 +1,13 @@
-/**
- * Copyright (C) 2025  AGH University of Science and Technology
- * MTM UEC2
- * Author: Tomasz Sieja
- *
- * Description:
- * Display invaders in a row with spacing.
+//////////////////////////////////////////////////////////////////////////////
+/*
+ Module name:   display_invader
+ Author:        Tomasz Sieja
+ Version:       1.0
+ Last modified: 2025-08-25
+ Coding style: safe with FPGA sync reset
+ Description:  Display invaders in a row with spacing
  */
+//////////////////////////////////////////////////////////////////////////////
 
 module display_invader #(
     parameter X_INIT = 200,
@@ -35,103 +37,105 @@ module display_invader #(
 
     import vga_pkg::*;
 
-    /**
-     * Local parameters
-     */
-    localparam SPACING = ((HOR_PIXELS - OFFSET) - (NUM_INVADERS * INVADER_WIDTH)) / (NUM_INVADERS - 1);
-    
-    /**
-     * Local variables and signals
-     */
-	vga_if vga_d();
+//------------------------------------------------------------------------------
+// local parameters
+//------------------------------------------------------------------------------
+localparam SPACING = ((HOR_PIXELS - OFFSET) - (NUM_INVADERS * INVADER_WIDTH)) / (NUM_INVADERS - 1);
 
-	logic [11:0] rgb_nxt;
+//------------------------------------------------------------------------------
+// local variables
+//------------------------------------------------------------------------------
+vga_if vga_d();
 
-    logic [5:0] rel_x, rel_y;
+logic [11:0] rgb_nxt;
 
-    logic invader_active;
-    /**
-     * Delays
-     */
-    delay #(
-        .WIDTH (38),
-        .CLK_DEL(1)
-    ) u_delay (
-        .clk (clk65MHz),
-        .rst (rst),
-        .din ({vga_in.hcount, vga_in.hsync, vga_in.vcount, vga_in.vsync, vga_in.hblnk, vga_in.vblnk, vga_in.rgb}),
-        .dout ({vga_d.hcount, vga_d.hsync, vga_d.vcount, vga_d.vsync, vga_d.hblnk, vga_d.vblnk, vga_d.rgb})
-    );
+logic [5:0] rel_x, rel_y;
 
-    /**
-     * Internal logic
-     */
-    always_ff @(posedge clk65MHz) begin : display_ff_blk
-        if (rst) begin
-            vga_out.vcount <= '0;
-            vga_out.vsync  <= '0;
-            vga_out.vblnk  <= '0;
-            vga_out.hcount <= '0;
-            vga_out.hsync  <= '0;
-            vga_out.hblnk  <= '0;
-            vga_out.rgb    <= '0;
-        end else begin
-            vga_out.hcount <= vga_d.hcount;
-            vga_out.vcount <= vga_d.vcount;
-            vga_out.hsync  <= vga_d.hsync;
-            vga_out.vsync  <= vga_d.vsync;
-            vga_out.hblnk  <= vga_d.hblnk;
-            vga_out.vblnk  <= vga_d.vblnk;
-            vga_out.rgb    <= rgb_nxt;
-        end
-    end
+logic invader_active;
 
-	always_ff @(posedge clk65MHz) begin : invader_positions_ff
+//------------------------------------------------------------------------------
+// output register with sync reset
+//------------------------------------------------------------------------------
+always_ff @(posedge clk65MHz) begin : display_ff_blk
     if (rst) begin
-        for (int i = 0; i < NUM_INVADERS; i++) begin
-            invader_x_positions[i] <= X_INIT + i * (INVADER_WIDTH + SPACING);
-        end
+        vga_out.vcount <= '0;
+        vga_out.vsync  <= '0;
+        vga_out.vblnk  <= '0;
+        vga_out.hcount <= '0;
+        vga_out.hsync  <= '0;
+        vga_out.hblnk  <= '0;
+        vga_out.rgb    <= '0;
     end else begin
-        for (int i = 0; i < NUM_INVADERS; i++) begin
-            invader_x_positions[i] <= X_INIT + xpos + i * (INVADER_WIDTH + SPACING);
+        vga_out.hcount <= vga_d.hcount;
+        vga_out.vcount <= vga_d.vcount;
+        vga_out.hsync  <= vga_d.hsync;
+        vga_out.vsync  <= vga_d.vsync;
+        vga_out.hblnk  <= vga_d.hblnk;
+        vga_out.vblnk  <= vga_d.vblnk;
+        vga_out.rgb    <= rgb_nxt;
+    end
+end
+
+//------------------------------------------------------------------------------
+// logic
+//------------------------------------------------------------------------------
+
+delay #(
+    .WIDTH (38),
+    .CLK_DEL(1)
+) u_delay (
+    .clk (clk65MHz),
+    .rst (rst),
+    .din ({vga_in.hcount, vga_in.hsync, vga_in.vcount, vga_in.vsync, vga_in.hblnk, vga_in.vblnk, vga_in.rgb}),
+    .dout ({vga_d.hcount, vga_d.hsync, vga_d.vcount, vga_d.vsync, vga_d.hblnk, vga_d.vblnk, vga_d.rgb})
+);
+
+always_ff @(posedge clk65MHz) begin : invader_positions_ff
+if (rst) begin
+    for (int i = 0; i < NUM_INVADERS; i++) begin
+        invader_x_positions[i] <= X_INIT + i * (INVADER_WIDTH + SPACING);
+    end
+end else begin
+    for (int i = 0; i < NUM_INVADERS; i++) begin
+        invader_x_positions[i] <= X_INIT + xpos + i * (INVADER_WIDTH + SPACING);
+    end
+end
+end
+
+// Calculate which invader is being displayed
+always_comb begin : invaders_display
+    invader_active = '0;
+    pixel_addr = '0;
+    
+    for (int currentInvader = 0; currentInvader < NUM_INVADERS; currentInvader++) begin
+        if (invader_enable[currentInvader]) begin
+        automatic int currentX = invader_x_positions[currentInvader];
+        automatic int currentY = Y_INIT + ypos;
+
+            if ((vga_d.hcount >= currentX) && (vga_d.hcount < currentX + INVADER_WIDTH) &&
+                (vga_d.vcount >= currentY) && (vga_d.vcount < currentY + INVADER_HEIGHT)) begin
+                invader_active = 1;
+
+                rel_x = vga_d.hcount - currentX;
+                rel_y = vga_d.vcount - currentY;
+                pixel_addr = {rel_y[5:0], rel_x[5:0]};
+                break;
+            end
         end
     end
 end
 
-    // Calculate which invader is being displayed
-    always_comb begin : invaders_display
-        invader_active = '0;
-        pixel_addr = '0;
-        
-        for (int currentInvader = 0; currentInvader < NUM_INVADERS; currentInvader++) begin
-            if (invader_enable[currentInvader]) begin
-            automatic int currentX = invader_x_positions[currentInvader];
-            automatic int currentY = Y_INIT + ypos;
-
-                if ((vga_d.hcount >= currentX) && (vga_d.hcount < currentX + INVADER_WIDTH) &&
-                    (vga_d.vcount >= currentY) && (vga_d.vcount < currentY + INVADER_HEIGHT)) begin
-                    invader_active = 1;
-
-                    rel_x = vga_d.hcount - currentX;
-                    rel_y = vga_d.vcount - currentY;
-                    pixel_addr = {rel_y[5:0], rel_x[5:0]};
-					break;
-                end
-            end
-        end
+always_comb begin : output_comb_blk
+    if (vga_d.vblnk || vga_d.hblnk) begin
+        rgb_nxt = vga_d.rgb;
     end
-
-    always_comb begin : output_comb_blk
-        if (vga_d.vblnk || vga_d.hblnk) begin
-            rgb_nxt = vga_d.rgb;
-        end
-        else if (invader_active) begin
-            if(rgb_pixel == 12'h0_0_0) rgb_nxt = vga_d.rgb;
-			else rgb_nxt = rgb_pixel;
-        end
-        else begin
-            rgb_nxt = vga_d.rgb;
-        end
+    else if (invader_active) begin
+        if(rgb_pixel == 12'h0_0_0) rgb_nxt = vga_d.rgb;
+        else rgb_nxt = rgb_pixel;
     end
-    
+    else begin
+        rgb_nxt = vga_d.rgb;
+    end
+end
+
 endmodule

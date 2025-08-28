@@ -4,7 +4,7 @@
  Module name:   template_simple
  Author:        Robert Szczygiel
  Version:       1.0
- Last modified: 2017-04-03
+ Last modified: 2023-05-18
  Coding style: safe, with FPGA sync reset
  Description:  Template for simple module with registered outputs
  */

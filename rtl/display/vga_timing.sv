@@ -1,11 +1,13 @@
-/**
- * Copyright (C) 2025  AGH University of Science and Technology
- * MTM UEC2
- * Author: Tomasz Sieja
- *
- * Description:
- * Vga timing controller.
+//////////////////////////////////////////////////////////////////////////////
+/*
+ Module name:   vga_timing
+ Author:        Tomasz Sieja
+ Version:       1.0
+ Last modified: 2025-08-25
+ Coding style: safe, with FPGA sync reset
+ Description:  VGA timing controller
  */
+//////////////////////////////////////////////////////////////////////////////
 
 module vga_timing (
     input  logic clk,       // 65 MHz clock
@@ -24,36 +26,41 @@ module vga_timing (
 
     import vga_pkg::*;
 
-    /**
-     * Local variables and signals
-     */
+//------------------------------------------------------------------------------
+// local parameters
+//------------------------------------------------------------------------------
 
-    logic [10:0] hcount1, vcount1;
-    logic hblnk1, hsync1, vblnk1, vsync1;                   
+//------------------------------------------------------------------------------
+// local variables
+//------------------------------------------------------------------------------
+logic [10:0] hcount1, vcount1;
+logic hblnk1, hsync1, vblnk1, vsync1;                   
 
-    /**
-     * Internal logic
-     */
-
-    always_ff @(posedge clk) begin : timing_ff_blk
-        if (rst) begin
-            hcount <= '0;
-            vcount <= '0;
-            hsync  <= '0;
-            vsync  <= '0;
-            hblnk  <= '0;
-            vblnk  <= '0;
-        end else begin
-            hcount <= hcount1;
-            vcount <= vcount1;
-            hsync  <= hsync1;
-            vsync  <= vsync1;
-            hblnk  <= hblnk1;
-            vblnk  <= vblnk1;
-        end
+//------------------------------------------------------------------------------
+// output register with sync reset
+//------------------------------------------------------------------------------
+always_ff @(posedge clk) begin : timing_ff_blk
+    if (rst) begin
+        hcount <= '0;
+        vcount <= '0;
+        hsync  <= '0;
+        vsync  <= '0;
+        hblnk  <= '0;
+        vblnk  <= '0;
+    end else begin
+        hcount <= hcount1;
+        vcount <= vcount1;
+        hsync  <= hsync1;
+        vsync  <= vsync1;
+        hblnk  <= hblnk1;
+        vblnk  <= vblnk1;
     end
+end
 
-    always_comb begin : timing_comb_blk
+//------------------------------------------------------------------------------
+// logic
+//------------------------------------------------------------------------------
+always_comb begin : timing_comb_blk
     hcount1 = hcount;
     vcount1 = vcount;
 

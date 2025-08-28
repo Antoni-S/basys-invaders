@@ -1,12 +1,13 @@
-/**
- * Copyright (C) 2025  AGH University of Science and Technology
- * MTM UEC2
- * Author: Antoni Sus
- *
- * Description:
- * Controller for handling enemy collisions
+//////////////////////////////////////////////////////////////////////////////
+/*
+ Module name:   collisions
+ Author:        Antoni Sus
+ Version:       1.0
+ Last modified: 2025-08-25
+ Coding style: safe, with FPGA sync reset
+ Description:  Controller for checking collisions between enemies/bullets and enemies/bottom screen edge
  */
-
+//////////////////////////////////////////////////////////////////////////////
 module collisions #(
     NUM_INVADERS = 10,
     NUM_ROWS = 3,
@@ -34,23 +35,22 @@ timeprecision 1ps;
 
 import vga_pkg::*;
 
-/**
- * Local parameters
- */
+//------------------------------------------------------------------------------
+// local parameters
+//------------------------------------------------------------------------------
 
-/**
- * Internal signals
- */
+//------------------------------------------------------------------------------
+// local variables
+//------------------------------------------------------------------------------
 logic [NUM_ROWS - 1:0][NUM_INVADERS - 1:0] collision_nxt;
 logic bullet_hit_nxt;
 logic player_hit_nxt;
 logic found_any_live;
 logic [$clog2(NUM_ROWS)-1:0] lowest_live_row;
 
-/**
- * Internal logic
- */
-
+//------------------------------------------------------------------------------
+// output register with sync reset
+//------------------------------------------------------------------------------
 always_ff @(posedge clk) begin
     if(rst) begin
         collision <= '1;
@@ -63,6 +63,9 @@ always_ff @(posedge clk) begin
     end
 end
 
+//------------------------------------------------------------------------------
+// logic
+//------------------------------------------------------------------------------
 always_comb begin
     collision_nxt = collision;
     bullet_hit_nxt = 0;

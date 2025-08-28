@@ -1,15 +1,16 @@
-/**
- * Copyright (C) 2025  AGH University of Science and Technology
- * MTM UEC2
- * Author: Antoni Sus
- *
- * Description:
- * Simple keyboard controller, that makes use of a select few keys on the keyboard
+//////////////////////////////////////////////////////////////////////////////
+/*
+ Module name:   keyboard_ctl
+ Author:        Antoni Sus
+ Version:       1.0
+ Last modified: 2025-08-25
+ Coding style: safe with FPGA sync reset
+ Description:  Simple keyboard controller, that makes use of a select few keys on the keyboard
  */
+//////////////////////////////////////////////////////////////////////////////
 
 module keyboard_ctl (
 	input logic clk,
-	input logic rst,
 	input logic [15:0] keycode,
 	output logic button_left,
 	output logic button_right,
@@ -20,18 +21,18 @@ module keyboard_ctl (
 timeunit 1ns;
 timeprecision 1ps;
 
-/**
- * Local parameters
- */
+//------------------------------------------------------------------------------
+// local parameters
+//------------------------------------------------------------------------------
 localparam LEFT = 8'h1C;
 localparam RIGHT = 8'h23;
 localparam UP = 8'h1D;
 localparam STOP = 8'hF0;
 localparam ENTER = 8'h5A;
 
-/**
- * Internal signals
- */
+//------------------------------------------------------------------------------
+// local variables
+//------------------------------------------------------------------------------
 logic btnL_nxt, btnR_nxt, btnU_nxt, buttonE_nxt;
 
 /**

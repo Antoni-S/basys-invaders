@@ -38,6 +38,9 @@ set sv_files {
     ../rtl/display/vga_pkg.sv
     ../rtl/display/vga_timing.sv
 	../rtl/keyboard/keyboard_ctl.sv
+    ../rtl/uart/coop_comm_test.sv
+    ../rtl/uart/coop_comm_tx.sv
+    ../rtl/uart/coop_comm_rx.sv
     ../rtl/misc/delay.sv
     ../rtl/misc/image_rom.sv
     ../rtl/misc/clk_divide.sv
@@ -53,6 +56,11 @@ set sv_files {
 set verilog_files {
     ../rtl/keyboard/debouncer.v
     ../rtl/keyboard/PS2Receiver.v
+    ../rtl/uart/fifo.v
+    ../rtl/uart/mod_m_counter.v
+    ../rtl/uart/uart_rx.v
+    ../rtl/uart/uart_tx.v
+    ../rtl/uart/uart.v
     rtl/clk_wiz_0_clk_wiz.v
 }
 
@@ -63,7 +71,14 @@ set verilog_files {
 
 # Specify files for a memory initialization     -- EDIT
 set mem_files {
+   ../rtl/display/start_prompt.dat
+   ../rtl/display/title.dat
    ../rtl/misc/placeholder.dat
+   ../rtl/misc/lose.dat
+   ../rtl/misc/win.dat
    ../rtl/player/spaceship1.dat
    ../rtl/player/projectile.dat
+   ../rtl/invaders/invader_1.dat
+   ../rtl/invaders/invader_2.dat
+   ../rtl/invaders/invader_3.dat
 }

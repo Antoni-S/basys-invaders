@@ -1,4 +1,13 @@
-
+//////////////////////////////////////////////////////////////////////////////
+/*
+ Module name:   draw_rect
+ Author:        Antoni Sus
+ Version:       1.0
+ Last modified: 2025-08-25
+ Coding style: safe, with FPGA sync reset
+ Description:  Module used for displaying a rectangle on a vga display.
+ */
+//////////////////////////////////////////////////////////////////////////////
 
 module draw_rect #(
 	parameter RECT_WIDTH = 32,
@@ -25,27 +34,19 @@ timeprecision 1ps;
 
 import vga_pkg::*;
 
-/**
- * Local variables and signals
- */
+//------------------------------------------------------------------------------
+// local parameters
+//------------------------------------------------------------------------------
 
-/**
- * Internal logic
- */
-
+//------------------------------------------------------------------------------
+// local variables
+//------------------------------------------------------------------------------
 vga_if draw_delay();
-
-delay #(
-    .WIDTH (38),
-    .CLK_DEL(CLK_DELAY)
-) u_delay (
-    .clk  (clk),
-    .rst  (rst),
-    .din  ({draw_in.hcount, draw_in.hsync, draw_in.hblnk, draw_in.vcount, draw_in.vsync, draw_in.vblnk, draw_in.rgb}),
-    .dout ({draw_delay.hcount, draw_delay.hsync, draw_delay.hblnk, draw_delay.vcount, draw_delay.vsync, draw_delay.vblnk, draw_delay.rgb})
-);
-
 logic [11:0] rgb_nxt;
+
+//------------------------------------------------------------------------------
+// output register with sync reset
+//------------------------------------------------------------------------------
 
 always_ff @(posedge clk) begin
     if(rst) begin
@@ -66,6 +67,20 @@ always_ff @(posedge clk) begin
         draw_out.rgb <= rgb_nxt;
     end
 end
+
+//------------------------------------------------------------------------------
+// logic
+//------------------------------------------------------------------------------
+
+delay #(
+    .WIDTH (38),
+    .CLK_DEL(CLK_DELAY)
+) u_delay (
+    .clk  (clk),
+    .rst  (rst),
+    .din  ({draw_in.hcount, draw_in.hsync, draw_in.hblnk, draw_in.vcount, draw_in.vsync, draw_in.vblnk, draw_in.rgb}),
+    .dout ({draw_delay.hcount, draw_delay.hsync, draw_delay.hblnk, draw_delay.vcount, draw_delay.vsync, draw_delay.vblnk, draw_delay.rgb})
+);
 
 assign pixel_addr = (draw_in.vcount-ypos) * RECT_WIDTH + (draw_in.hcount - xpos);
 

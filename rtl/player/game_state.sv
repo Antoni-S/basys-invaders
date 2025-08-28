@@ -1,11 +1,14 @@
-/**
- * Copyright (C) 2025  AGH University of Science and Technology
- * MTM UEC2
- * Author: Antoni Sus
- *
- * Description:
- * Controller for handling winning and losing conditions of the game
+//////////////////////////////////////////////////////////////////////////////
+/*
+ Module name:   game_state
+ Author:        Antoni Sus
+ Version:       1.0
+ Last modified: 2025-08-25
+ Coding style: safe with FPGA sync reset
+ Description:  Controller for handling winning and losing conditions of the game
  */
+//////////////////////////////////////////////////////////////////////////////
+
 
 module game_state #(
     parameter NUM_INVADERS = 10,
@@ -24,19 +27,18 @@ module game_state #(
 timeunit 1ns;
 timeprecision 1ps;
 
-/**
- * Local parameters
- */
+//------------------------------------------------------------------------------
+// local parameters
+//------------------------------------------------------------------------------
 
-/**
- * Internal signals
- */
+//------------------------------------------------------------------------------
+// local variables
+//------------------------------------------------------------------------------
 logic game_lost_nxt, game_won_nxt;
 
-/**
- * Internal logic
- */
-
+//------------------------------------------------------------------------------
+// output register with sync reset
+//------------------------------------------------------------------------------
 always_ff @(posedge clk) begin
     if(rst) begin
         game_lost <= '0;
@@ -47,6 +49,9 @@ always_ff @(posedge clk) begin
     end
 end
 
+//------------------------------------------------------------------------------
+// logic
+//------------------------------------------------------------------------------
 always_comb begin
     game_lost_nxt = game_lost;
     game_won_nxt = game_won;
