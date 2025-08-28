@@ -20,8 +20,6 @@ module top_vga #(
         input  logic clk, //65MHz clock
         input  logic rst,
         input logic [11:0] remote_xpos,
-        input logic remote_fire,
-        input logic [NUM_ROWS - 1:0][NUM_INVADERS - 1:0] remote_collisions,
 
         output logic vs,
         output logic hs,
@@ -29,8 +27,6 @@ module top_vga #(
         output logic [3:0] g,
         output logic [3:0] b,
         output logic [11:0] player_xpos,
-        output logic buttonU,
-        output logic [NUM_ROWS - 1:0][NUM_INVADERS - 1:0] collision,
 
 		inout  logic PS2Clk,
 		inout  logic PS2Data
@@ -90,7 +86,7 @@ module top_vga #(
     wire [11:0] projectile_addr, projectile_rgb, projectile_xpos, projectile_ypos;
 	wire bullet_active;
 	wire [15:0] ps2_keycode;
-	wire buttonL, buttonR, buttonE;
+	wire buttonL, buttonR, buttonE, buttonU;
 
 	wire[11:0] image_addr_row1, image_rgb_row1;
     wire[11:0] image_addr_row2, image_rgb_row2;
@@ -98,6 +94,7 @@ module top_vga #(
 
     wire[9:0]  enemy_xpos, enemy_ypos;
     wire [NUM_INVADERS-1:0][11:0] invader_x_positions;
+    wire [NUM_ROWS - 1:0][NUM_INVADERS - 1:0] collision;
 
     wire bullet_hit;
     wire player_hit;
@@ -262,7 +259,7 @@ module top_vga #(
         .draw_out   (vga_remote_player_if.out),
         .rgb_pixel  (remote_rgb),
         .pixel_addr (remote_addr),
-        .xpos       (remote_xpos + SPRITE_WIDTH),
+        .xpos       (remote_xpos),
         .ypos       (player_ypos),
         .enabled    (1'b1)
     );

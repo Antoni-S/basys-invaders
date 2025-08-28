@@ -18,7 +18,6 @@ module top_vga_basys3 (
         input  wire btnC,
         input  wire test_Rx,
         input  wire JB1,
-        input  wire JC2,
 
         output wire Vsync,
         output wire Hsync,
@@ -27,7 +26,6 @@ module top_vga_basys3 (
         output wire [3:0] vgaBlue,
         output wire JA1,
         output wire test_Tx,
-        output wire JB2,
         output wire JC1,
         output wire led0,
 
@@ -51,15 +49,12 @@ module top_vga_basys3 (
 
     logic [7:0] w_data, w_data_test;
     logic wr_uart, wr_uart_test;
-    logic tx_full, tx_full_test;
-    logic [7:0] r_data, r_data_test;
+    logic tx_full;
+    logic [7:0] r_data;
     logic rd_uart;
-    logic rx_empty, rx_empty_test;
+    logic rx_empty;
 
-    wire buttonU;
-    wire [NUM_ROWS - 1:0][NUM_INVADERS - 1:0] collision, remote_collisions;
     wire [11:0] player_xpos, remote_xpos;
-    wire remote_fire;
 
     /**
      * Signals assignments
@@ -87,10 +82,10 @@ module top_vga_basys3 (
         .wr_uart(wr_uart_test),
         .rx(test_Rx),
         .w_data(w_data_test),
-        .tx_full(tx_full_test),
-        .rx_empty(rx_empty_test),
+        .tx_full(),
+        .rx_empty(),
         .tx(test_Tx),
-        .r_data(r_data_test)
+        .r_data()
     );
 
     coop_comm_test #(
@@ -185,11 +180,7 @@ module top_vga_basys3 (
 		.PS2Clk(PS2Clk),
 		.PS2Data(PS2Data),
         .player_xpos(player_xpos),
-        .buttonU(buttonU),
-        .collision(collision),
-        .remote_xpos(remote_xpos),
-        .remote_fire(remote_fire),
-        .remote_collisions(remote_collisions)
+        .remote_xpos(remote_xpos)
     );
 
 endmodule

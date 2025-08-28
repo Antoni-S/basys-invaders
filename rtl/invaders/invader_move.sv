@@ -28,8 +28,8 @@ import vga_pkg::*;
 //------------------------------------------------------------------------------
 // local parameters
 //------------------------------------------------------------------------------
-localparam signed X_MOVE = 2;
-localparam signed Y_MOVE = 16;
+localparam signed X_MOVE = 4;
+localparam signed Y_MOVE = 32;
 localparam CLOCKS_PER_SECOND = 65_000_000;
 
 //------------------------------------------------------------------------------

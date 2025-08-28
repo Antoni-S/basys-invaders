@@ -70,6 +70,8 @@ always_comb begin
     collision_nxt = collision;
     bullet_hit_nxt = 0;
     player_hit_nxt = player_hit;
+    lowest_live_row = '0;
+    found_any_live = '0;
 
     if(bullet_active) begin
         for(logic [NUM_ROWS - 1:0] row = 0; row < NUM_ROWS; row++) begin
